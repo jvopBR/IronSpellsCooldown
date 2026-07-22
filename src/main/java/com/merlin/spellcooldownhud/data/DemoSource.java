@@ -1,0 +1,77 @@
+package com.merlin.spellcooldownhud.data;
+
+import com.merlin.spellcooldownhud.config.ContentMode;
+import net.minecraft.network.chat.Component;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Cooldowns falsos que correm sozinhos, para o preview ao vivo do editor.
+ *
+ * <p>E o que permite ajustar posicao, cores e estilo sem estar em combate -- ou sem estar num
+ * mundo. Repare que esta classe nao importa nada do Iron's Spells: ela pede as magias de amostra
+ * a {@link IronSpellsSource#previewSamples(int)} e apenas anima os numeros.
+ */
+public final class DemoSource implements CooldownSource {
+
+    /** Nomes usados so quando o registry ainda nao respondeu (ex. Iron's Spells ausente). */
+    private static final String[] PLACEHOLDER_NAMES = {
+            "Fireball", "Ice Spike", "Blood Slash", "Teleport", "Heal", "Lightning Bolt"
+    };
+
+    private final long startedAtMs = System.currentTimeMillis();
+
+    @Override
+    public List<CooldownEntry> collect(ContentMode mode) {
+        // No modo ALL_EQUIPPED faz sentido mostrar mais entradas, algumas ja prontas.
+        int count = mode == ContentMode.ALL_EQUIPPED ? 6 : 4;
+
+        List<CooldownEntry> samples = IronSpellsSource.previewSamples(count);
+        if (samples.isEmpty()) {
+            samples = placeholders(count);
+        }
+
+        long elapsedTicks = (System.currentTimeMillis() - startedAtMs) / 50L;
+
+        List<CooldownEntry> animated = new ArrayList<>(samples.size());
+        for (int i = 0; i < samples.size(); i++) {
+            CooldownEntry sample = samples.get(i);
+            animated.add(sample.withRemaining(animatedRemaining(sample, i, elapsedTicks)));
+        }
+        return animated;
+    }
+
+    /**
+     * Faz o tempo restante decair e reiniciar em loop, com cada entrada defasada da anterior, para
+     * o preview mostrar varios estagios de cooldown ao mesmo tempo.
+     */
+    private static int animatedRemaining(CooldownEntry sample, int index, long elapsedTicks) {
+        int total = Math.max(1, sample.totalTicks());
+        long offset = (long) index * (total / 4L + 5L);
+        long position = Math.floorMod(elapsedTicks + offset, total);
+        return (int) (total - position);
+    }
+
+    private static List<CooldownEntry> placeholders(int count) {
+        List<CooldownEntry> entries = new ArrayList<>(count);
+        for (int i = 0; i < count; i++) {
+            String name = PLACEHOLDER_NAMES[i % PLACEHOLDER_NAMES.length];
+            int total = 200 + i * 40;
+            entries.add(new CooldownEntry(
+                    "preview:" + name.toLowerCase(java.util.Locale.ROOT).replace(' ', '_'),
+                    null, // sem icone: os renderers desenham um quadrado colorido no lugar
+                    Component.literal(name),
+                    1 + (i % 5),
+                    total,
+                    total,
+                    PLACEHOLDER_COLORS[i % PLACEHOLDER_COLORS.length],
+                    i));
+        }
+        return entries;
+    }
+
+    private static final int[] PLACEHOLDER_COLORS = {
+            0xE05A2B, 0x4FC3F7, 0xC62828, 0x9C6ADE, 0x66BB6A, 0xFFD54F
+    };
+}

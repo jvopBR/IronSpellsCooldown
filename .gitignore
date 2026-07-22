@@ -38,3 +38,7 @@ run/
 **/src/generated/**/.cache/
 repo/
 !**/src/**/repo/
+
+### Jars de terceiros (Iron's Spells e dependencias) ###
+# Nao redistribuimos mods dos outros. Veja o README para repopular libs/.
+libs/*.jar

@@ -1,0 +1,89 @@
+{
+  "screen.spellcooldownhud.editor": "Spell Cooldown HUD Editor",
+  "screen.spellcooldownhud.hint": "Drag the HUD to position it. Arrow keys nudge 1px (Shift = 10px).",
+  "screen.spellcooldownhud.move": "Move HUD",
+  "screen.spellcooldownhud.moveHint": "Click and drag the HUD wherever you want. Arrow keys nudge 1px (Shift = 10px).",
+  "screen.spellcooldownhud.openSettings": "Settings",
+  "screen.spellcooldownhud.currentAnchor": "Anchor",
+  "screen.spellcooldownhud.serverTps": "Server TPS",
+  "screen.spellcooldownhud.tab.content": "Content",
+  "screen.spellcooldownhud.tab.layout": "Layout",
+  "screen.spellcooldownhud.tab.style": "Style",
+  "screen.spellcooldownhud.tab.colors": "Colors",
+  "screen.spellcooldownhud.tab.effects": "Effects",
+
+  "key.categories.spellcooldownhud": "Spell Cooldown HUD",
+  "key.spellcooldownhud.open_editor": "Open HUD editor",
+
+  "hud.spellcooldownhud.ready": "ready",
+
+  "option.spellcooldownhud.on": "On",
+  "option.spellcooldownhud.off": "Off",
+  "option.spellcooldownhud.resetAll": "Reset to defaults",
+  "option.spellcooldownhud.resetPosition": "Center position",
+
+  "option.spellcooldownhud.contentMode": "Show",
+  "option.spellcooldownhud.sortMode": "Sort",
+  "option.spellcooldownhud.maxEntries": "Max spells",
+  "option.spellcooldownhud.hideInF1": "Hide with F1",
+  "option.spellcooldownhud.useServerTime": "Real cooldown (TPS)",
+
+  "option.spellcooldownhud.anchor": "Anchor",
+  "option.spellcooldownhud.growDirection": "Direction",
+  "option.spellcooldownhud.iconSize": "Icon size",
+  "option.spellcooldownhud.spacing": "Spacing",
+  "option.spellcooldownhud.maxPerLine": "Per line",
+
+  "option.spellcooldownhud.style": "Style",
+  "option.spellcooldownhud.timerFormat": "Timer format",
+  "option.spellcooldownhud.showIcon": "Icon",
+  "option.spellcooldownhud.showName": "Spell name",
+  "option.spellcooldownhud.showTimer": "Time remaining",
+  "option.spellcooldownhud.showLevel": "Spell level",
+  "option.spellcooldownhud.drawBorder": "Border",
+
+  "option.spellcooldownhud.useSchoolColor": "School color",
+  "option.spellcooldownhud.backgroundColor": "Background",
+  "option.spellcooldownhud.sweepColor": "Sweep",
+  "option.spellcooldownhud.borderColor": "Border",
+  "option.spellcooldownhud.textColor": "Text",
+  "option.spellcooldownhud.readyFlashColor": "Flash",
+
+  "option.spellcooldownhud.opacity": "Opacity",
+  "option.spellcooldownhud.scale": "Scale",
+  "option.spellcooldownhud.fadeIn": "Fade in",
+  "option.spellcooldownhud.fadeOut": "Fade out",
+  "option.spellcooldownhud.flashWhenReady": "Flash when ready",
+  "option.spellcooldownhud.dimWhenOnCooldown": "Dim while on cooldown",
+
+  "option.spellcooldownhud.contentmode.ONLY_ON_COOLDOWN": "On cooldown only",
+  "option.spellcooldownhud.contentmode.ALL_EQUIPPED": "All equipped",
+
+  "option.spellcooldownhud.sortmode.TIME_REMAINING_ASC": "Least time",
+  "option.spellcooldownhud.sortmode.TIME_REMAINING_DESC": "Most time",
+  "option.spellcooldownhud.sortmode.SLOT_ORDER": "Slot order",
+  "option.spellcooldownhud.sortmode.NAME": "Name",
+
+  "option.spellcooldownhud.anchor.TOP_LEFT": "Top left",
+  "option.spellcooldownhud.anchor.TOP_CENTER": "Top center",
+  "option.spellcooldownhud.anchor.TOP_RIGHT": "Top right",
+  "option.spellcooldownhud.anchor.MIDDLE_LEFT": "Middle left",
+  "option.spellcooldownhud.anchor.CENTER": "Center",
+  "option.spellcooldownhud.anchor.MIDDLE_RIGHT": "Middle right",
+  "option.spellcooldownhud.anchor.BOTTOM_LEFT": "Bottom left",
+  "option.spellcooldownhud.anchor.BOTTOM_CENTER": "Bottom center",
+  "option.spellcooldownhud.anchor.BOTTOM_RIGHT": "Bottom right",
+
+  "option.spellcooldownhud.growdirection.RIGHT": "Right",
+  "option.spellcooldownhud.growdirection.LEFT": "Left",
+  "option.spellcooldownhud.growdirection.DOWN": "Down",
+  "option.spellcooldownhud.growdirection.UP": "Up",
+
+  "option.spellcooldownhud.hudstyle.RADIAL": "Radial",
+  "option.spellcooldownhud.hudstyle.BAR": "Bar",
+  "option.spellcooldownhud.hudstyle.TEXT_LIST": "Text",
+
+  "option.spellcooldownhud.timerformat.SECONDS": "Seconds",
+  "option.spellcooldownhud.timerformat.TENTHS": "Tenths",
+  "option.spellcooldownhud.timerformat.MM_SS": "Minutes"
+}

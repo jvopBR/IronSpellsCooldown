@@ -1,0 +1,89 @@
+{
+  "screen.spellcooldownhud.editor": "Editor da HUD de Cooldowns",
+  "screen.spellcooldownhud.hint": "Arraste a HUD para posicionar. Setas ajustam 1px (Shift = 10px).",
+  "screen.spellcooldownhud.move": "Mover HUD",
+  "screen.spellcooldownhud.moveHint": "Clique e arraste a HUD para onde quiser. Setas ajustam 1px (Shift = 10px).",
+  "screen.spellcooldownhud.openSettings": "Configurações",
+  "screen.spellcooldownhud.currentAnchor": "Âncora",
+  "screen.spellcooldownhud.serverTps": "TPS do servidor",
+  "screen.spellcooldownhud.tab.content": "Conteúdo",
+  "screen.spellcooldownhud.tab.layout": "Layout",
+  "screen.spellcooldownhud.tab.style": "Estilo",
+  "screen.spellcooldownhud.tab.colors": "Cores",
+  "screen.spellcooldownhud.tab.effects": "Efeitos",
+
+  "key.categories.spellcooldownhud": "Spell Cooldown HUD",
+  "key.spellcooldownhud.open_editor": "Abrir editor da HUD",
+
+  "hud.spellcooldownhud.ready": "pronta",
+
+  "option.spellcooldownhud.on": "Ligado",
+  "option.spellcooldownhud.off": "Desligado",
+  "option.spellcooldownhud.resetAll": "Restaurar padrões",
+  "option.spellcooldownhud.resetPosition": "Centralizar posição",
+
+  "option.spellcooldownhud.contentMode": "Mostrar",
+  "option.spellcooldownhud.sortMode": "Ordem",
+  "option.spellcooldownhud.maxEntries": "Máximo de magias",
+  "option.spellcooldownhud.hideInF1": "Esconder com F1",
+  "option.spellcooldownhud.useServerTime": "Cooldown real (TPS)",
+
+  "option.spellcooldownhud.anchor": "Âncora",
+  "option.spellcooldownhud.growDirection": "Direção",
+  "option.spellcooldownhud.iconSize": "Tamanho do ícone",
+  "option.spellcooldownhud.spacing": "Espaçamento",
+  "option.spellcooldownhud.maxPerLine": "Por linha",
+
+  "option.spellcooldownhud.style": "Estilo",
+  "option.spellcooldownhud.timerFormat": "Formato do tempo",
+  "option.spellcooldownhud.showIcon": "Ícone",
+  "option.spellcooldownhud.showName": "Nome da magia",
+  "option.spellcooldownhud.showTimer": "Tempo restante",
+  "option.spellcooldownhud.showLevel": "Nível da magia",
+  "option.spellcooldownhud.drawBorder": "Borda",
+
+  "option.spellcooldownhud.useSchoolColor": "Cor da escola",
+  "option.spellcooldownhud.backgroundColor": "Fundo",
+  "option.spellcooldownhud.sweepColor": "Varredura",
+  "option.spellcooldownhud.borderColor": "Borda",
+  "option.spellcooldownhud.textColor": "Texto",
+  "option.spellcooldownhud.readyFlashColor": "Brilho",
+
+  "option.spellcooldownhud.opacity": "Opacidade",
+  "option.spellcooldownhud.scale": "Escala",
+  "option.spellcooldownhud.fadeIn": "Fade ao surgir",
+  "option.spellcooldownhud.fadeOut": "Fade ao sumir",
+  "option.spellcooldownhud.flashWhenReady": "Brilho ao ficar pronta",
+  "option.spellcooldownhud.dimWhenOnCooldown": "Escurecer em cooldown",
+
+  "option.spellcooldownhud.contentmode.ONLY_ON_COOLDOWN": "Só em cooldown",
+  "option.spellcooldownhud.contentmode.ALL_EQUIPPED": "Todas equipadas",
+
+  "option.spellcooldownhud.sortmode.TIME_REMAINING_ASC": "Menor tempo",
+  "option.spellcooldownhud.sortmode.TIME_REMAINING_DESC": "Maior tempo",
+  "option.spellcooldownhud.sortmode.SLOT_ORDER": "Ordem dos slots",
+  "option.spellcooldownhud.sortmode.NAME": "Nome",
+
+  "option.spellcooldownhud.anchor.TOP_LEFT": "Sup. esquerda",
+  "option.spellcooldownhud.anchor.TOP_CENTER": "Sup. centro",
+  "option.spellcooldownhud.anchor.TOP_RIGHT": "Sup. direita",
+  "option.spellcooldownhud.anchor.MIDDLE_LEFT": "Meio esquerda",
+  "option.spellcooldownhud.anchor.CENTER": "Centro",
+  "option.spellcooldownhud.anchor.MIDDLE_RIGHT": "Meio direita",
+  "option.spellcooldownhud.anchor.BOTTOM_LEFT": "Inf. esquerda",
+  "option.spellcooldownhud.anchor.BOTTOM_CENTER": "Inf. centro",
+  "option.spellcooldownhud.anchor.BOTTOM_RIGHT": "Inf. direita",
+
+  "option.spellcooldownhud.growdirection.RIGHT": "Direita",
+  "option.spellcooldownhud.growdirection.LEFT": "Esquerda",
+  "option.spellcooldownhud.growdirection.DOWN": "Baixo",
+  "option.spellcooldownhud.growdirection.UP": "Cima",
+
+  "option.spellcooldownhud.hudstyle.RADIAL": "Radial",
+  "option.spellcooldownhud.hudstyle.BAR": "Barra",
+  "option.spellcooldownhud.hudstyle.TEXT_LIST": "Texto",
+
+  "option.spellcooldownhud.timerformat.SECONDS": "Segundos",
+  "option.spellcooldownhud.timerformat.TENTHS": "Décimos",
+  "option.spellcooldownhud.timerformat.MM_SS": "Minutos"
+}
