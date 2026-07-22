@@ -170,10 +170,18 @@ Coisas descobertas na marra, registradas para não voltarem:
 Setup do ambiente de desenvolvimento
 ------------------------------------
 
-Requer **JDK 21**. O projeto roda o Iron's Spells de verdade no dev client, então precisa dos jars
-dele e das suas 5 dependências em `libs/`.
+Requer **JDK 21**. Para apenas compilar, é só clonar e rodar `./gradlew build` — a API do Iron's
+Spells é resolvida do Modrinth (`maven.modrinth:irons-spells-n-spellbooks`), sem nenhum passo
+manual.
 
-`libs/*.jar` está no `.gitignore` — não redistribuímos mods de terceiros. Para repopular, copie
+### `libs/` — só para o `runClient`
+
+O dev client roda o Iron's Spells de verdade, e para isso precisa dos jars dele e das 5
+dependências. Sem eles o `build` continua funcionando normalmente; só o `runClient` sobe sem magia
+nenhuma.
+
+`libs/*.jar` está no `.gitignore` — não redistribuímos mods de terceiros, e é por isso que a
+compilação usa o Modrinth: o runner do CI não teria contra o que compilar. Para popular, copie
 estes arquivos de uma instância do CurseForge (as versões precisam bater com as de
 `gradle.properties`):
 
@@ -200,6 +208,9 @@ quebra com `IllegalAccessError` logo no boot do dev client.
 Duas linhas do original foram removidas por usarem nomes SRG legados (`f_59605_`, `f_129744_`), que
 não existem no NeoForge com mappings Mojang. Ao atualizar o Iron's Spells, regenere o arquivo e
 refaça essa remoção.
+
+O `build.gradle` só registra o AT quando `libs/` está completo — sem dev client montado não há o que
+transformar, e insistir nele quebraria o build em máquina limpa.
 
 Comandos
 --------
