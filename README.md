@@ -224,14 +224,17 @@ of the original were dropped for using legacy SRG names (`f_59605_`, `f_129744_`
 under Mojang mappings; regenerate and re-apply that removal when updating Iron's Spells. The AT is
 only registered when `libs/` is complete, so a clean build doesn't break.
 
-Contributing
-------------
+Bug reports
+-----------
 
-Issues and pull requests are welcome. For translations, copy `en_us.json`, translate the values
-(keys stay the same) and open a PR — see [Languages](#languages).
+Found a bug or want to help translate? Open an issue on GitHub. For translations, include the
+`<code>.json` file (copy `en_us.json`, keep the keys, translate the values). By submitting a
+contribution you agree it may be included in the mod under the project's license.
 
 License
 -------
 
-[MIT](LICENSE). The Mojang mappings used at compile time have their own license:
-https://github.com/NeoForged/NeoForm/blob/main/Mojang.md
+**All Rights Reserved** — see [LICENSE](LICENSE). The source is published for reference and bug
+reports only; you may not redistribute, re-upload or create derivative works without written
+permission. The official download is the project's CurseForge page. The Mojang mappings used at
+compile time have their own license: https://github.com/NeoForged/NeoForm/blob/main/Mojang.md
