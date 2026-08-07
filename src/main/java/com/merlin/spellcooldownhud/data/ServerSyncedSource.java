@@ -35,6 +35,14 @@ import java.util.Set;
  * o mesmo compasso do decremento do cooldown -- e o servidor o corrige no cliente a cada 20
  * ticks (ver {@link ServerClock}). O TPS medido nao entra nesta conta; ele so serve para
  * converter os ticks restantes em segundos na hora de exibir.
+ *
+ * <h2>Limpeza autoritativa (ex. /clearCooldowns)</h2>
+ * O comando {@code /clearCooldowns} do Iron's Spells limpa os cooldowns no servidor e sincroniza
+ * para o cliente, entao a magia some do mapa mesmo com tempo "natural" ainda restante. Isso e
+ * indistinguivel de "o cliente contou rapido demais" olhando so o mapa -- mas nao olhando o
+ * ultimo contador CLIENT-SIDE: o cliente so remove uma entrada por expiracao quando o proprio
+ * contador dele chega a zero. Se a magia sumiu com muito tempo client-side ainda restante, foi
+ * limpeza/resync, e a entrada NAO deve ser ressuscitada (ver {@link #collectDroppedEarly}).
  */
 public final class ServerSyncedSource implements CooldownSource {
 
@@ -43,6 +51,14 @@ public final class ServerSyncedSource implements CooldownSource {
      * dele nunca deveria passar do previsto; quando passa com folga, a magia foi lancada de novo.
      */
     private static final int RECAST_TOLERANCE_TICKS = 5;
+
+    /**
+     * Quanto o contador client-side pode faltar e ainda contar como expiracao natural. O cliente
+     * decrementa ate ~0 antes de remover uma entrada, entao o ultimo valor visto e sempre baixo;
+     * se a magia sumiu com bem mais que isto restando, foi limpeza autoritativa (/clearCooldowns)
+     * ou um resync do servidor, nao expiracao -- e a magia esta realmente pronta.
+     */
+    private static final int NATURAL_EXPIRY_TOLERANCE_TICKS = 3;
 
     private final CooldownSource delegate;
     private final Map<String, Anchor> anchors = new HashMap<>();
@@ -123,6 +139,14 @@ public final class ServerSyncedSource implements CooldownSource {
             Anchor anchor = mapping.getValue();
             long remaining = anchor.endGameTime - gameTime;
             if (remaining <= 0L || anchor.lastSeen == null) {
+                iterator.remove();
+                continue;
+            }
+
+            // Se a entrada sumiu com o contador client-side ainda alto, foi /clearCooldowns ou um
+            // resync do servidor -- a magia esta pronta de verdade. So expiracao natural (contador
+            // client-side perto de zero) merece ser ressuscitada pelo tempo do servidor.
+            if (anchor.lastSeen.remainingTicks() > NATURAL_EXPIRY_TOLERANCE_TICKS) {
                 iterator.remove();
                 continue;
             }
