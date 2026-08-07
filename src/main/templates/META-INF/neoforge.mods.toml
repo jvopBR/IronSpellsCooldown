@@ -8,28 +8,28 @@ version = "${mod_version}"
 displayName = "${mod_name}"
 authors = "Merlin"
 description = '''
-HUD client-side de cooldown de magias para Iron's Spells 'n Spellbooks.
-Mostra o tempo restante de cada magia depois de usa-la, com estilo, posicao,
-cores e conteudo totalmente configuraveis pelo player.
+Client-side spell cooldown HUD for Iron's Spells 'n Spellbooks.
+Shows the remaining cooldown of every spell after you cast it, with fully
+configurable style, position, colors and content -- and a real cooldown that
+stays accurate even when the server's TPS drops.
 '''
 
-# Iron's Spells e a fonte dos dados de cooldown -- sem ele o mod nao tem o que mostrar.
+# Iron's Spells is the source of the cooldown data -- without it there is nothing to show.
 #
-# side = "CLIENT" combinado com zero payloads de rede registrados faz este mod ficar de fora
-# da negociacao de mods do NeoForge. Ou seja: da pra entrar num servidor que NAO tem este mod
-# instalado, que e exatamente o caso de uso.
+# side = "CLIENT" plus zero registered network payloads keeps this mod out of NeoForge's mod
+# negotiation, so you can join a server that does NOT have it installed -- which is the whole point.
 [[dependencies.${mod_id}]]
     modId = "irons_spellbooks"
     type = "required"
     versionRange = "[1.21.1-3.16.0,)"
-    # AFTER: o SpellRegistry do Iron's Spells precisa estar populado antes de resolvermos ids.
+    # AFTER: the Iron's Spells SpellRegistry must be populated before we resolve spell ids.
     ordering = "AFTER"
     side = "CLIENT"
 
 [[dependencies.${mod_id}]]
     modId = "neoforge"
     type = "required"
-    # Minimo suportado, nao a versao de compilacao: ver neo_version_range em gradle.properties.
+    # Minimum supported, not the compile version: see neo_version_range in gradle.properties.
     versionRange = "${neo_version_range}"
     ordering = "NONE"
     side = "CLIENT"

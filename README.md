@@ -1,120 +1,138 @@
 Spell Cooldown HUD
 ==================
 
-Mod **client-side** para Minecraft 1.21.1 que mostra o cooldown das magias do
+**English** · [Português (BR)](README.pt-BR.md)
+
+**Client-side** Minecraft 1.21.1 mod that shows the cooldown of your
 [Iron's Spells 'n Spellbooks](https://www.curseforge.com/minecraft/mc-mods/irons-spells-n-spellbooks)
-numa HUD totalmente configurável — estilo, posição, cores, conteúdo e animações.
+spells on a fully configurable HUD — style, position, colors, content and animations.
 
-Dois pontos que o diferenciam da HUD padrão:
+Two things set it apart from the built-in HUD:
 
-- **Mostra o cooldown real mesmo com o servidor lagado.** O Iron's Spells sincroniza o cooldown uma
-  única vez e o cliente conta sozinho a 20/s, então num servidor com TPS baixo o número chega a zero
-  antes da magia ficar pronta. Este mod corrige isso pelo relógio do servidor
-  ([detalhes](#cooldown-real-em-servidor-lagado)).
-- **Funciona com magias de addons** (`somakespells`, `gametechbcs_spellbooks`, ...) sem nenhum
-  ajuste, ícones inclusive: tudo é resolvido pelo `SpellRegistry` do Iron's Spells.
+- **It shows the real cooldown even when the server lags.** Iron's Spells syncs the cooldown only
+  once and the client counts down on its own at 20/s, so on a low-TPS server the number hits zero
+  before the spell is actually ready. This mod corrects it against the server clock
+  ([details](#real-cooldown-on-a-lagging-server)).
+- **It works with addon spells** (`somakespells`, `gametechbcs_spellbooks`, ...) out of the box,
+  icons included: everything is resolved through the Iron's Spells `SpellRegistry`.
 
-Como não registra nenhum payload de rede, **dá para usar em servidores que não têm este mod
-instalado** — o NeoForge nem o inclui na negociação de mods.
+Because it registers no network payloads, **you can use it on servers that don't have it
+installed** — NeoForge doesn't even include it in mod negotiation.
 
-Requisitos
-----------
+Languages
+---------
+
+The whole interface is translated and follows the game language automatically (Minecraft loads the
+matching `.json`; nothing to configure):
+
+- English (`en_us`)
+- Português do Brasil (`pt_br`)
+- Español — Spain (`es_es`) and Mexico (`es_mx`)
+- Русский (`ru_ru`)
+
+Minecraft does **not** fall back between regional variants: someone playing a Spanish variant with
+no file of its own (e.g. `es_ar`) gets English, not `es_es`. To add a language, copy `en_us.json`,
+translate the values and save it as `<code>.json` — the keys don't change. The Russian translation
+still needs review by a native speaker; corrections are welcome.
+
+Requirements
+------------
 
 | | |
 |---|---|
 | Minecraft | 1.21.1 |
-| NeoForge | 21.1.0 ou superior (compilado contra 21.1.241) |
-| Iron's Spells 'n Spellbooks | 1.21.1-3.16.0 ou superior |
-| Lado | Somente cliente — **não** instale no servidor |
+| NeoForge | 21.1.0 or newer (built against 21.1.241) |
+| Iron's Spells 'n Spellbooks | 1.21.1-3.16.0 or newer |
+| Side | Client only — do **not** install it on the server |
 
-Uso
----
+Usage
+-----
 
-- Tecla **K** abre a tela de mover a HUD: totalmente transparente, arraste com o mouse para onde
-  quiser (remapeável em Opções > Controles).
-- De lá, **Configurações** abre o editor completo. Também acessível por
+- Press **K** to open the move screen: fully transparent, just drag the HUD with the mouse
+  (rebindable in Options > Controls).
+- From there, **Settings** opens the full editor. Also reachable via
   **Mods > Spell Cooldown HUD > Config**.
-- Setas ajustam 1px, Shift+setas 10px. A HUD não sai da tela.
+- Arrow keys nudge 1px, Shift+arrows 10px. The HUD never leaves the screen.
 
-Configuração
-------------
+Configuration
+-------------
 
-Tudo é editável no jogo, com preview ao vivo. O arquivo fica em
+Everything is editable in-game with a live preview. The file lives at
 `config/spellcooldownhud-client.toml`.
 
-**`[content]` — o que aparece**
+**`[content]` — what shows up**
 `contentMode` (`ONLY_ON_COOLDOWN` \| `ALL_EQUIPPED`) · `sortMode` (`TIME_REMAINING_ASC` \|
 `TIME_REMAINING_DESC` \| `SLOT_ORDER` \| `NAME`) · `maxEntries` · `hideWhenGuiHidden` ·
 `useServerTime`
 
-**`[layout]` — onde fica**
-`anchor` (9 pontos) · `offsetX`/`offsetY` · `growDirection` (`RIGHT` \| `LEFT` \| `DOWN` \| `UP`) ·
+**`[layout]` — where it sits**
+`anchor` (9 points) · `offsetX`/`offsetY` · `growDirection` (`RIGHT` \| `LEFT` \| `DOWN` \| `UP`) ·
 `iconSize` · `spacing` · `maxPerLine`
 
-**`[style]` — como cada entrada é desenhada**
+**`[style]` — how each entry is drawn**
 `style` (`RADIAL` \| `BAR` \| `TEXT_LIST`) · `showIcon` · `showSpellName` · `showTimer` ·
 `timerFormat` (`SECONDS` \| `TENTHS` \| `MM_SS`) · `showSpellLevel` · `drawBorder`
 
-**`[colors]` — hex `#RRGGBB` ou `#AARRGGBB`**
-`useSchoolColor` (tira a cor da escola da magia) · `backgroundColor` · `sweepColor` ·
+**`[colors]` — hex `#RRGGBB` or `#AARRGGBB`**
+`useSchoolColor` (takes the spell school's color) · `backgroundColor` · `sweepColor` ·
 `borderColor` · `textColor` · `readyFlashColor`
 
 **`[effects]`**
 `opacity` · `scale` · `fadeInTicks` · `fadeOutTicks` · `flashWhenReady` · `dimWhenOnCooldown`
 
-> Com `showSpellLevel` ligado, ícones abaixo de ~18px não têm altura para o tempo e o nível sem
-> encostarem (fonte de 9px, dois textos). O nível tem fundo escuro justamente para continuar
-> legível nesse caso.
+> With `showSpellLevel` on, icons below ~18px don't have the height to fit both the timer and the
+> level without overlapping (9px font, two texts). The level has a dark background exactly so it
+> stays readable in that case.
 
-Cooldown real em servidor lagado
---------------------------------
+Real cooldown on a lagging server
+---------------------------------
 
-O Iron's Spells sincroniza o cooldown **uma única vez**, quando ele começa (`SyncCooldownPacket`);
-depois o cliente decrementa sozinho em `ClientPlayerEvents.onPlayerTick`. Não há resync periódico —
-`PlayerCooldowns.syncToPlayer` só roda em login e respawn.
+Iron's Spells syncs the cooldown **once**, when it starts (`SyncCooldownPacket`); after that the
+client decrements it on its own in `ClientPlayerEvents.onPlayerTick`. There is no periodic resync —
+`PlayerCooldowns.syncToPlayer` only runs on login and respawn.
 
-O cliente sempre roda a 20 ticks/s, mas o servidor roda a TPS reais. Num servidor a 10 TPS a
-contagem do cliente corre o dobro da velocidade da do servidor: **o número chega a zero enquanto a
-magia ainda está em cooldown de verdade**, e a HUD passa a mentir justamente quando mais importa.
+The client always runs at 20 ticks/s, but the server runs at its real TPS. On a 10-TPS server the
+client's count runs twice as fast as the server's: **the number hits zero while the spell is still
+on cooldown**, and the HUD ends up lying exactly when it matters most.
 
-A correção (`data/ServerSyncedSource`) grava, ao ver o cooldown pela primeira vez, em que *tempo de
-jogo* ele termina — e daí em diante o restante é sempre `fim - gameTime`. Quando o cliente derruba a
-entrada cedo demais, a HUD a mantém em tela até o servidor realmente terminar.
+The fix (`data/ServerSyncedSource`) records, the first time it sees a cooldown, the *game time* at
+which it ends — from then on the remaining time is always `end - gameTime`. When the client drops
+the entry too early, the HUD keeps it on screen until the server actually finishes.
 
-Isso é exato, não uma estimativa, porque o tempo de jogo avança 1 por tick de servidor (o mesmo
-compasso do decremento do cooldown) e o servidor o corrige no cliente a cada 20 ticks via
-`ClientboundSetTimePacket`. Nenhum mixin é necessário: `ClientLevel.getGameTime()` já é o relógio
-autoritativo do servidor.
+This is exact, not an estimate, because game time advances by 1 per server tick (the same pace as
+the cooldown decrement) and the server corrects it on the client every 20 ticks via
+`ClientboundSetTimePacket`. No mixin is needed: `ClientLevel.getGameTime()` is already the server's
+authoritative clock.
 
-O TPS medido (`client/ServerClock`, derivado da mesma fonte) **não** entra nessa conta — serve só
-para converter os ticks restantes em segundos na hora de exibir. O editor mostra o TPS medido no
-rodapé quando ele cai abaixo de 19,5.
+The measured TPS (`client/ServerClock`, derived from the same source) does **not** enter that
+calculation — it only converts the remaining ticks into seconds for display. The editor shows the
+measured TPS in its footer when it drops below 19.5.
 
-Desligável em `useServerTime`.
+Toggle it off with `useServerTime`.
 
-### Limitação conhecida: `/tick freeze`
+### Known limitation: `/tick freeze`
 
-`/tick rate` é tratado corretamente: o cliente é avisado da nova taxa, então tanto o tempo de jogo
-quanto o decremento local desaceleram juntos e a correção vira um no-op. (Por isso `/tick rate`
-**não serve para testar** a correção: ele é uma desaceleração sincronizada, e o bug só aparece
-quando o servidor atrasa sem o cliente saber.)
+`/tick rate` is handled correctly: the client is told the new rate, so both game time and the local
+decrement slow down together and the correction becomes a no-op. (This is also why `/tick rate`
+**does not test** the correction: it's a synchronized slowdown, and the bug only shows up when the
+server falls behind without the client knowing.)
 
-`/tick freeze` não: ele congela o tempo de jogo mas **players continuam tickando**, então o cooldown
-avança no servidor enquanto o nosso âncora fica parado — a HUD passa a mostrar mais tempo do que o
-real. É um comando de debug, não uma condição de servidor em produção, e o erro é para o lado
-conservador (tempo a mais, nunca a menos), então foi aceito em vez de tratado.
+`/tick freeze` is not: it freezes game time but **players keep ticking**, so the cooldown advances
+on the server while our anchor stays put — the HUD then shows more time than the real value. It's a
+debug command, not a production server condition, and the error is on the conservative side (too
+much time, never too little), so it was accepted rather than handled.
 
-Arquitetura
------------
+Architecture
+------------
 
-A regra que sustenta o resto: **`data/IronSpellsSource` é a única classe que importa
-`io.redspace.*`**. Ela traduz a API do Iron's Spells em `CooldownEntry`, um record que só usa tipos
-do Minecraft.
+The rule that holds the rest together: **`data/IronSpellsSource` is the only class that imports
+`io.redspace.*`**. It translates the Iron's Spells API into `CooldownEntry`, a record that only uses
+Minecraft types.
 
-Isso dá três coisas de uma vez: o editor roda um preview ao vivo com dados falsos
-(`data/DemoSource`) sem estar em combate ou sequer num mundo; uma mudança de API do Iron's Spells
-quebra a compilação num arquivo só; e dá para suportar outro mod de magia depois adicionando um
-`CooldownSource`, sem tocar em renderer nenhum.
+That buys three things at once: the editor runs a live preview on fake data (`data/DemoSource`)
+without being in combat or even in a world; an Iron's Spells API change breaks compilation in a
+single file; and another spell mod can be supported later by adding one `CooldownSource`, without
+touching any renderer.
 
 ```
 SpellCooldownHud            entry point, @Mod(dist = CLIENT)
@@ -123,67 +141,72 @@ config/                     ModConfigSpec + enums
     HudConfig, CachedColor, Anchor, GrowDirection,
     HudStyle, ContentMode, SortMode, TimerFormat
 
-data/                       dados, sem tipos do Minecraft além do necessário
-    CooldownEntry           record puro (id, ícone, nome, ticks, cor da escola)
+data/                       data, no Minecraft types beyond what's needed
+    CooldownEntry           plain record (id, icon, name, ticks, school color)
     CooldownSource          interface
-    IronSpellsSource        ÚNICA classe que fala com o Iron's Spells
-    ServerSyncedSource      decorator: corrige o cooldown pelo relógio do servidor
-    DemoSource              cooldowns falsos para o preview do editor
+    IronSpellsSource        the ONLY class that talks to Iron's Spells
+    ServerSyncedSource      decorator: corrects the cooldown against the server clock
+    DemoSource              fake cooldowns for the editor preview
 
 client/
-    ClientEvents            tick do jogo: relógio, tracker, keybind
-    ClientModEvents         registro da camada de GUI e das teclas
-    ServerClock             tempo de jogo + TPS estimado, sem mixin
-    CooldownTracker         estado de animação (fade, brilho ao ficar pronta)
-    HudLayout               âncora + offset + direção -> coordenadas
-    HudLayer                LayeredDraw.Layer, acima da hotbar
+    ClientEvents            game tick: clock, tracker, keybind
+    ClientModEvents         GUI layer and key mapping registration
+    ServerClock             game time + estimated TPS, no mixin
+    CooldownTracker         animation state (fade, ready flash)
+    HudLayout               anchor + offset + direction -> coordinates
+    HudLayer                LayeredDraw.Layer, above the hotbar
     Keybinds
     render/                 RenderSupport + RadialRenderer, BarRenderer, TextListRenderer
 
 screen/
-    HudMoveScreen           overlay transparente, arrasto livre
-    HudEditorScreen         editor completo em abas, com preview
-    HudDragController       arrasto/preview compartilhados pelas duas telas
-    HudPreviewScreen        marca as telas que desenham o próprio preview
+    HudMoveScreen           transparent overlay, free dragging
+    HudEditorScreen         full tabbed editor, with preview
+    HudDragController       dragging/preview shared by both screens
+    HudPreviewScreen        marks the screens that draw their own preview
 ```
 
-Notas de implementação
-----------------------
+### Implementation notes
 
-Coisas descobertas na marra, registradas para não voltarem:
+Things learned the hard way, written down so they don't come back:
 
-- **`Screen.render` chama `renderBackground` antes dos widgets**, e o padrão aplica o blur do
-  vanilla mais o fundo de menu. Como as telas deste mod desenham o preview antes de chamar
-  `super.render()`, isso caía *por cima* do preview. Ambas sobrescrevem `renderBackground` como
-  no-op e desenham o próprio fundo na ordem que querem.
-- **`GuiGraphics.blit` de 9 argumentos não escala** — usa os mesmos números para origem e destino.
-  Para desenhar um ícone 16×16 em outro tamanho é preciso o overload de 11 argumentos.
-- **O `GuiLayerManager` achata os grupos de camadas** e embrulha cada camada *vanilla* no teste de
-  `hideGui`. Camadas de mod inseridas entre elas **não** herdam esse teste, então o F1 precisa ser
-  verificado à mão (`HudLayer.shouldRender`).
-- **A varredura radial projeta os vértices na borda do quadrado**, não de um círculo, para cobrir o
-  ícone até os cantos sem vazar pelas laterais.
-- **`neo_version` ≠ `neo_version_range`**: o primeiro é a versão de compilação, o segundo o mínimo
-  exigido em runtime. Declarar a de compilação como mínimo faz o mod ser recusado em instâncias um
-  pouco mais antigas da mesma linha 21.1.x.
+- **`Screen.render` calls `renderBackground` before the widgets**, and the default applies the
+  vanilla blur plus the menu background. Since this mod's screens draw the preview before calling
+  `super.render()`, that landed *on top of* the preview. Both override `renderBackground` as a no-op
+  and draw their own background in the order they want.
+- **The 9-argument `GuiGraphics.blit` does not scale** — it uses the same numbers for source and
+  destination. Drawing a 16×16 icon at another size needs the 11-argument overload.
+- **`GuiLayerManager` flattens the layer groups** and wraps each *vanilla* layer in the `hideGui`
+  check. Mod layers inserted between them do **not** inherit that check, so F1 has to be checked by
+  hand (`HudLayer.shouldRender`).
+- **The radial sweep projects its vertices onto the square's edge**, not a circle's, to cover the
+  icon all the way to the corners without spilling out the sides.
+- **`neo_version` ≠ `neo_version_range`**: the former is the compile version, the latter the runtime
+  minimum. Declaring the compile version as the minimum makes the mod get rejected on slightly older
+  instances of the same 21.1.x line.
 
-Setup do ambiente de desenvolvimento
-------------------------------------
+Building
+--------
 
-Requer **JDK 21**. Para apenas compilar, é só clonar e rodar `./gradlew build` — a API do Iron's
-Spells é resolvida do Modrinth (`maven.modrinth:irons-spells-n-spellbooks`), sem nenhum passo
-manual.
+Requires **JDK 21**. To just compile, clone and run `./gradlew build` — the Iron's Spells API is
+resolved from Modrinth (`maven.modrinth:irons-spells-n-spellbooks`), with no manual step.
 
-### `libs/` — só para o `runClient`
+```
+./gradlew build             # compiles and packages into build/libs/
+./gradlew runClient         # dev client with Iron's Spells loaded
+./gradlew deployToInstance  # copies the jar into a CurseForge instance's mods/ folder
+```
 
-O dev client roda o Iron's Spells de verdade, e para isso precisa dos jars dele e das 5
-dependências. Sem eles o `build` continua funcionando normalmente; só o `runClient` sobe sem magia
-nenhuma.
+Point `deployToInstance` at another instance by setting `instance_mods_dir` in your
+`~/.gradle/gradle.properties` instead of editing `build.gradle`.
 
-`libs/*.jar` está no `.gitignore` — não redistribuímos mods de terceiros, e é por isso que a
-compilação usa o Modrinth: o runner do CI não teria contra o que compilar. Para popular, copie
-estes arquivos de uma instância do CurseForge (as versões precisam bater com as de
-`gradle.properties`):
+### `libs/` — only for `runClient`
+
+The dev client runs Iron's Spells for real, and for that it needs its jar and 5 dependencies.
+Without them `build` still works fine; only `runClient` comes up with no spells.
+
+`libs/*.jar` is in `.gitignore` — we don't redistribute third-party mods, which is why compilation
+uses Modrinth: a clean checkout (CI included) has nothing local to compile against. To populate it,
+copy these files from a CurseForge instance (versions must match `gradle.properties`):
 
 ```
 irons_spellbooks-1.21.1-3.16.2.jar
@@ -193,39 +216,22 @@ player-animation-lib-forge-2.0.4+1.21.1.jar
 curios-neoforge-9.5.1+1.21.1.jar
 ```
 
-Origem usada neste setup:
-`C:\Users\Merli\curseforge\minecraft\Instances\SMP  Somake Server\mods\`
+Also `libs/irons_spellbooks_at.cfg`: a **sanitized** copy of the access transformer bundled inside
+the Iron's Spells jar, registered in `build.gradle` via `neoForge.accessTransformers`. ModDevGradle
+applies ATs to the Minecraft artifact at build time, and a runtime-classpath-only mod's AT isn't
+applied on its own — without it Iron's Spells crashes with `IllegalAccessError` at boot. Two lines
+of the original were dropped for using legacy SRG names (`f_59605_`, `f_129744_`) that don't exist
+under Mojang mappings; regenerate and re-apply that removal when updating Iron's Spells. The AT is
+only registered when `libs/` is complete, so a clean build doesn't break.
 
-### `libs/irons_spellbooks_at.cfg`
+Contributing
+------------
 
-Cópia **sanitizada** do access transformer que vem dentro do jar do Iron's Spells, registrada no
-`build.gradle` via `neoForge.accessTransformers`.
+Issues and pull requests are welcome. For translations, copy `en_us.json`, translate the values
+(keys stay the same) and open a PR — see [Languages](#languages).
 
-Ela é necessária porque o ModDevGradle aplica ATs no artefato do Minecraft em tempo de build, e o AT
-de um mod que está apenas no runtime classpath não é aplicado sozinho — sem isso o Iron's Spells
-quebra com `IllegalAccessError` logo no boot do dev client.
-
-Duas linhas do original foram removidas por usarem nomes SRG legados (`f_59605_`, `f_129744_`), que
-não existem no NeoForge com mappings Mojang. Ao atualizar o Iron's Spells, regenere o arquivo e
-refaça essa remoção.
-
-O `build.gradle` só registra o AT quando `libs/` está completo — sem dev client montado não há o que
-transformar, e insistir nele quebraria o build em máquina limpa.
-
-Comandos
---------
-
-```
-./gradlew build             # compila e empacota em build/libs/
-./gradlew runClient         # dev client com Iron's Spells carregado
-./gradlew deployToInstance  # copia o jar para o mods/ da instância do CurseForge
-```
-
-Para apontar o `deployToInstance` para outra instância, defina `instance_mods_dir` no seu
-`~/.gradle/gradle.properties` em vez de editar o `build.gradle`.
-
-Licença
+License
 -------
 
-MIT. Os mappings da Mojang usados na compilação têm licença própria:
+[MIT](LICENSE). The Mojang mappings used at compile time have their own license:
 https://github.com/NeoForged/NeoForm/blob/main/Mojang.md

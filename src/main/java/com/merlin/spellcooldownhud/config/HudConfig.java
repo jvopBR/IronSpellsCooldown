@@ -56,108 +56,108 @@ public final class HudConfig {
     public static final ModConfigSpec SPEC;
 
     static {
-        BUILDER.comment("O que aparece na HUD").push("content");
+        BUILDER.comment("What shows up on the HUD").push("content");
         CONTENT_MODE = BUILDER
-                .comment("ONLY_ON_COOLDOWN: o icone aparece ao usar a magia e some quando fica pronta.",
-                        "ALL_EQUIPPED: mostra sempre todas as magias equipadas.")
+                .comment("ONLY_ON_COOLDOWN: the icon appears when you cast a spell and fades when it is ready.",
+                        "ALL_EQUIPPED: always shows every equipped spell.")
                 .defineEnum("contentMode", ContentMode.ONLY_ON_COOLDOWN);
         SORT_MODE = BUILDER
-                .comment("Ordem das entradas. SLOT_ORDER e a mais estavel: os icones nao trocam de lugar.")
+                .comment("Entry order. SLOT_ORDER is the most stable: icons never swap places.")
                 .defineEnum("sortMode", SortMode.TIME_REMAINING_ASC);
         MAX_ENTRIES = BUILDER
-                .comment("Numero maximo de entradas desenhadas de uma vez.")
+                .comment("Maximum number of entries drawn at once.")
                 .defineInRange("maxEntries", 12, 1, 64);
         HIDE_IN_F1 = BUILDER
-                .comment("Esconder a HUD quando a interface estiver oculta (F1).")
+                .comment("Hide the HUD when the interface is hidden (F1).")
                 .define("hideWhenGuiHidden", true);
         USE_SERVER_TIME = BUILDER
-                .comment("Mostrar o cooldown REAL, corrigido pelo relogio do servidor.",
-                        "O Iron's Spells sincroniza o cooldown so no inicio e depois o cliente conta",
-                        "sozinho a 20/s. Num servidor com TPS baixo o servidor conta mais devagar, e",
-                        "sem esta correcao o numero chega a zero antes da magia ficar pronta.",
-                        "Desligue apenas se suspeitar que a correcao esta atrapalhando.")
+                .comment("Show the REAL cooldown, corrected by the server clock.",
+                        "Iron's Spells only syncs the cooldown at the start, then the client counts down",
+                        "on its own at 20/s. On a low-TPS server the server counts slower, and without",
+                        "this correction the number hits zero before the spell is actually ready.",
+                        "Turn off only if you suspect the correction is getting in the way.")
                 .define("useServerTime", true);
         BUILDER.pop();
 
-        BUILDER.comment("Onde a HUD fica e como as entradas se distribuem").push("layout");
+        BUILDER.comment("Where the HUD sits and how entries are laid out").push("layout");
         ANCHOR = BUILDER
-                .comment("Canto da tela usado como referencia. O offset e aplicado a partir dele.")
+                .comment("Screen corner used as reference. The offset is applied from it.")
                 .defineEnum("anchor", Anchor.BOTTOM_CENTER);
         OFFSET_X = BUILDER
-                .comment("Deslocamento horizontal a partir da ancora, em pixels de GUI.")
+                .comment("Horizontal offset from the anchor, in GUI pixels.")
                 .defineInRange("offsetX", 0, -10000, 10000);
         OFFSET_Y = BUILDER
-                .comment("Deslocamento vertical a partir da ancora, em pixels de GUI.")
+                .comment("Vertical offset from the anchor, in GUI pixels.")
                 .defineInRange("offsetY", -60, -10000, 10000);
         GROW_DIRECTION = BUILDER
-                .comment("Direcao em que as entradas se acumulam.")
+                .comment("Direction in which entries stack up.")
                 .defineEnum("growDirection", GrowDirection.RIGHT);
         ICON_SIZE = BUILDER
-                .comment("Lado do icone em pixels de GUI. As texturas do Iron's Spells sao 16x16 e sao escaladas.")
+                .comment("Icon side in GUI pixels. Iron's Spells textures are 16x16 and get scaled.")
                 .defineInRange("iconSize", 20, 4, 128);
         SPACING = BUILDER
-                .comment("Espaco entre entradas, em pixels de GUI.")
+                .comment("Gap between entries, in GUI pixels.")
                 .defineInRange("spacing", 4, 0, 64);
         MAX_PER_LINE = BUILDER
-                .comment("Quantas entradas por linha (ou coluna) antes de quebrar.")
+                .comment("How many entries per row (or column) before wrapping.")
                 .defineInRange("maxPerLine", 8, 1, 32);
         BUILDER.pop();
 
-        BUILDER.comment("Aparencia de cada entrada").push("style");
+        BUILDER.comment("Look of each entry").push("style");
         STYLE = BUILDER
-                .comment("RADIAL: varredura circular sobre o icone.",
-                        "BAR: barra de progresso sob o icone.",
-                        "TEXT_LIST: so texto, sem icone.")
+                .comment("RADIAL: circular sweep over the icon.",
+                        "BAR: progress bar under the icon.",
+                        "TEXT_LIST: text only, no icon.")
                 .defineEnum("style", HudStyle.RADIAL);
         SHOW_ICON = BUILDER.define("showIcon", true);
         SHOW_NAME = BUILDER
-                .comment("Nome da magia ao lado do icone. Sempre visivel no estilo TEXT_LIST.")
+                .comment("Spell name next to the icon. Always shown in the TEXT_LIST style.")
                 .define("showSpellName", false);
         SHOW_TIMER = BUILDER.define("showTimer", true);
         TIMER_FORMAT = BUILDER
-                .comment("SECONDS: '7s'. TENTHS: '3.4' abaixo de 10s. MM_SS: '1:05'.")
+                .comment("SECONDS: '7s'. TENTHS: '3.4' below 10s. MM_SS: '1:05'.")
                 .defineEnum("timerFormat", TimerFormat.SECONDS);
         SHOW_LEVEL = BUILDER
-                .comment("Nivel da magia num canto do icone.")
+                .comment("Spell level in a corner of the icon.")
                 .define("showSpellLevel", false);
         DRAW_BORDER = BUILDER.define("drawBorder", true);
         BUILDER.pop();
 
-        BUILDER.comment("Cores em hex: #RRGGBB ou #AARRGGBB").push("colors");
+        BUILDER.comment("Colors in hex: #RRGGBB or #AARRGGBB").push("colors");
         USE_SCHOOL_COLOR = BUILDER
-                .comment("Tirar a cor da borda/barra da escola da magia (fogo, gelo, sangue...)",
-                        "em vez de usar borderColor. Cor vem do proprio Iron's Spells.")
+                .comment("Take the border/bar color from the spell's school (fire, ice, blood...)",
+                        "instead of borderColor. The color comes from Iron's Spells itself.")
                 .define("useSchoolColor", true);
         BACKGROUND_COLOR = color("backgroundColor", "#90000000",
-                "Fundo atras do icone.");
+                "Background behind the icon.");
         SWEEP_COLOR = color("sweepColor", "#B0101014",
-                "Cor da varredura/parte consumida da barra: o que cobre o icone enquanto o cooldown corre.");
+                "Sweep / consumed part of the bar: what covers the icon while the cooldown runs.");
         BORDER_COLOR = color("borderColor", "#FF3C3C46",
-                "Borda. Ignorada quando useSchoolColor esta ligado.");
+                "Border. Ignored when useSchoolColor is on.");
         TEXT_COLOR = color("textColor", "#FFFFFFFF",
-                "Numeros e nomes.");
+                "Numbers and names.");
         READY_FLASH_COLOR = color("readyFlashColor", "#A0FFFFFF",
-                "Brilho rapido no instante em que a magia fica pronta.");
+                "Quick flash the moment the spell becomes ready.");
         BUILDER.pop();
 
-        BUILDER.comment("Transparencia, escala e animacoes").push("effects");
+        BUILDER.comment("Transparency, scale and animations").push("effects");
         OPACITY = BUILDER
-                .comment("Opacidade geral da HUD.")
+                .comment("Overall HUD opacity.")
                 .defineInRange("opacity", 1.0, 0.05, 1.0);
         SCALE = BUILDER
-                .comment("Escala da HUD inteira, aplicada sobre a escala de GUI do jogo.")
+                .comment("Scale of the whole HUD, applied on top of the game's GUI scale.")
                 .defineInRange("scale", 1.0, 0.25, 4.0);
         FADE_IN_TICKS = BUILDER
-                .comment("Ticks de fade ao surgir. 0 desliga (20 ticks = 1s).")
+                .comment("Fade-in ticks when appearing. 0 disables it (20 ticks = 1s).")
                 .defineInRange("fadeInTicks", 3, 0, 100);
         FADE_OUT_TICKS = BUILDER
-                .comment("Ticks de fade ao sumir, no modo ONLY_ON_COOLDOWN.")
+                .comment("Fade-out ticks when disappearing, in ONLY_ON_COOLDOWN mode.")
                 .defineInRange("fadeOutTicks", 6, 0, 100);
         FLASH_WHEN_READY = BUILDER
-                .comment("Brilho no instante em que a magia fica pronta.")
+                .comment("Flash the moment the spell becomes ready.")
                 .define("flashWhenReady", true);
         DIM_WHEN_READY = BUILDER
-                .comment("No modo ALL_EQUIPPED, escurecer as magias que NAO estao prontas.")
+                .comment("In ALL_EQUIPPED mode, dim the spells that are NOT ready.")
                 .define("dimWhenOnCooldown", true);
         BUILDER.pop();
 

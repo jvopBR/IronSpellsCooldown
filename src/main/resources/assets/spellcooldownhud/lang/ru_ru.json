@@ -1,0 +1,89 @@
+{
+  "screen.spellcooldownhud.editor": "Редактор HUD перезарядки",
+  "screen.spellcooldownhud.hint": "Перетащите HUD для размещения. Стрелки — 1px (Shift = 10px).",
+  "screen.spellcooldownhud.move": "Переместить HUD",
+  "screen.spellcooldownhud.moveHint": "Нажмите и перетащите HUD куда угодно. Стрелки — 1px (Shift = 10px).",
+  "screen.spellcooldownhud.openSettings": "Настройки",
+  "screen.spellcooldownhud.currentAnchor": "Привязка",
+  "screen.spellcooldownhud.serverTps": "TPS сервера",
+  "screen.spellcooldownhud.tab.content": "Содержимое",
+  "screen.spellcooldownhud.tab.layout": "Расположение",
+  "screen.spellcooldownhud.tab.style": "Стиль",
+  "screen.spellcooldownhud.tab.colors": "Цвета",
+  "screen.spellcooldownhud.tab.effects": "Эффекты",
+
+  "key.categories.spellcooldownhud": "Spell Cooldown HUD",
+  "key.spellcooldownhud.open_editor": "Открыть редактор HUD",
+
+  "hud.spellcooldownhud.ready": "готово",
+
+  "option.spellcooldownhud.on": "Вкл",
+  "option.spellcooldownhud.off": "Выкл",
+  "option.spellcooldownhud.resetAll": "Сбросить настройки",
+  "option.spellcooldownhud.resetPosition": "Центрировать",
+
+  "option.spellcooldownhud.contentMode": "Показывать",
+  "option.spellcooldownhud.sortMode": "Сортировка",
+  "option.spellcooldownhud.maxEntries": "Макс. заклинаний",
+  "option.spellcooldownhud.hideInF1": "Скрывать при F1",
+  "option.spellcooldownhud.useServerTime": "Реальная перезарядка (TPS)",
+
+  "option.spellcooldownhud.anchor": "Привязка",
+  "option.spellcooldownhud.growDirection": "Направление",
+  "option.spellcooldownhud.iconSize": "Размер значка",
+  "option.spellcooldownhud.spacing": "Отступ",
+  "option.spellcooldownhud.maxPerLine": "В ряд",
+
+  "option.spellcooldownhud.style": "Стиль",
+  "option.spellcooldownhud.timerFormat": "Формат времени",
+  "option.spellcooldownhud.showIcon": "Значок",
+  "option.spellcooldownhud.showName": "Название заклинания",
+  "option.spellcooldownhud.showTimer": "Оставшееся время",
+  "option.spellcooldownhud.showLevel": "Уровень заклинания",
+  "option.spellcooldownhud.drawBorder": "Рамка",
+
+  "option.spellcooldownhud.useSchoolColor": "Цвет школы",
+  "option.spellcooldownhud.backgroundColor": "Фон",
+  "option.spellcooldownhud.sweepColor": "Заполнение",
+  "option.spellcooldownhud.borderColor": "Рамка",
+  "option.spellcooldownhud.textColor": "Текст",
+  "option.spellcooldownhud.readyFlashColor": "Вспышка",
+
+  "option.spellcooldownhud.opacity": "Прозрачность",
+  "option.spellcooldownhud.scale": "Масштаб",
+  "option.spellcooldownhud.fadeIn": "Появление",
+  "option.spellcooldownhud.fadeOut": "Исчезновение",
+  "option.spellcooldownhud.flashWhenReady": "Вспышка при готовности",
+  "option.spellcooldownhud.dimWhenOnCooldown": "Затемнять при перезарядке",
+
+  "option.spellcooldownhud.contentmode.ONLY_ON_COOLDOWN": "Только на перезарядке",
+  "option.spellcooldownhud.contentmode.ALL_EQUIPPED": "Все снаряжённые",
+
+  "option.spellcooldownhud.sortmode.TIME_REMAINING_ASC": "Меньше времени",
+  "option.spellcooldownhud.sortmode.TIME_REMAINING_DESC": "Больше времени",
+  "option.spellcooldownhud.sortmode.SLOT_ORDER": "По слотам",
+  "option.spellcooldownhud.sortmode.NAME": "По имени",
+
+  "option.spellcooldownhud.anchor.TOP_LEFT": "Сверху слева",
+  "option.spellcooldownhud.anchor.TOP_CENTER": "Сверху по центру",
+  "option.spellcooldownhud.anchor.TOP_RIGHT": "Сверху справа",
+  "option.spellcooldownhud.anchor.MIDDLE_LEFT": "Посередине слева",
+  "option.spellcooldownhud.anchor.CENTER": "По центру",
+  "option.spellcooldownhud.anchor.MIDDLE_RIGHT": "Посередине справа",
+  "option.spellcooldownhud.anchor.BOTTOM_LEFT": "Снизу слева",
+  "option.spellcooldownhud.anchor.BOTTOM_CENTER": "Снизу по центру",
+  "option.spellcooldownhud.anchor.BOTTOM_RIGHT": "Снизу справа",
+
+  "option.spellcooldownhud.growdirection.RIGHT": "Вправо",
+  "option.spellcooldownhud.growdirection.LEFT": "Влево",
+  "option.spellcooldownhud.growdirection.DOWN": "Вниз",
+  "option.spellcooldownhud.growdirection.UP": "Вверх",
+
+  "option.spellcooldownhud.hudstyle.RADIAL": "Радиальный",
+  "option.spellcooldownhud.hudstyle.BAR": "Полоса",
+  "option.spellcooldownhud.hudstyle.TEXT_LIST": "Текст",
+
+  "option.spellcooldownhud.timerformat.SECONDS": "Секунды",
+  "option.spellcooldownhud.timerformat.TENTHS": "Десятые",
+  "option.spellcooldownhud.timerformat.MM_SS": "Минуты"
+}
