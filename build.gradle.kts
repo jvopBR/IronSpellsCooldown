@@ -7,20 +7,30 @@ plugins {
     idea
 }
 
-// Propriedades do gradle.properties. Em Kotlin DSL nao sao variaveis implicitas como no Groovy;
-// precisam ser declaradas com delegacao `by project`.
+// gradle.properties values. In Kotlin DSL they aren't implicit variables like in Groovy;
+// they must be declared with `by project` delegation.
 val mod_version: String by project
 val mod_group_id: String by project
 val mod_id: String by project
 val mod_name: String by project
 val mod_license: String by project
-val minecraft_version: String by project
-val minecraft_version_range: String by project
-val neo_version: String by project
-val neo_version_range: String by project
 val loader_version_range: String by project
-val parchment_mappings_version: String by project
-val parchment_minecraft_version: String by project
+
+// Per-Minecraft-version values, chosen by the active Stonecutter node. Kept here rather than in
+// gradle.properties because they differ between 1.21 and 1.21.1.
+val minecraft_version = stonecutter.current.version
+
+// [neo_version, neo_version_range, parchment_minecraft_version, parchment_mappings_version, minecraft_version_range]
+val mcSpec = when (minecraft_version) {
+    "1.21.1" -> listOf("21.1.241", "[21.1.0,)", "1.21.1", "2024.11.17", "[1.21.1]")
+    "1.21"   -> listOf("21.0.167", "[21.0.0,)", "1.21",   "2024.07.28", "[1.21]")
+    else -> error("Unmapped Minecraft version: $minecraft_version")
+}
+val neo_version = mcSpec[0]
+val neo_version_range = mcSpec[1]
+val parchment_minecraft_version = mcSpec[2]
+val parchment_mappings_version = mcSpec[3]
+val minecraft_version_range = mcSpec[4]
 val irons_spellbooks_version: String by project
 val irons_lib_version: String by project
 val geckolib_version: String by project
