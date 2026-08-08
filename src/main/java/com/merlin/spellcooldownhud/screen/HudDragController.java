@@ -11,10 +11,10 @@ import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Preview e arrasto da HUD, compartilhados pelo editor e pela tela de mover.
+ * HUD preview and dragging, shared by the editor and the move screen.
  *
- * <p>Fica numa classe so de proposito: duas implementacoes de arrasto acabariam divergindo, e a
- * mesma acao do mouse passaria a posicionar a HUD em lugares diferentes dependendo da tela.
+ * <p>In a single class on purpose: two drag implementations would end up diverging, and the same
+ * mouse action would position the HUD differently depending on the screen.
  */
 public final class HudDragController {
 
@@ -27,7 +27,7 @@ public final class HudDragController {
 
     private @Nullable HudLayout lastLayout;
 
-    /** Desenha o preview com dados ficticios e guarda o layout resultante. */
+    /** Draws the preview with fake data and stores the resulting layout. */
     public void drawPreview(GuiGraphics graphics) {
         preview.refresh(HudConfig.CONTENT_MODE.get());
         lastLayout = HudLayer.draw(graphics, preview, HudConfig.CONTENT_MODE.get());
@@ -54,12 +54,12 @@ public final class HudDragController {
     }
 
     /**
-     * Tenta agarrar a HUD.
+     * Tries to grab the HUD.
      *
-     * @param minX borda esquerda utilizavel; o editor passa a largura do painel para cliques sobre
-     *             ele nao virarem arrasto. A tela de mover passa 0, e por isso nela da para levar
-     *             a HUD ate a borda esquerda.
-     * @return true se o arrasto comecou
+     * @param minX usable left edge; the editor passes the panel width so clicks on it don't become
+     *             drags. The move screen passes 0, which is why there you can take the HUD all the
+     *             way to the left edge.
+     * @return true if the drag started
      */
     public boolean beginDrag(double mouseX, double mouseY, int minX) {
         if (lastLayout == null || mouseX < minX) {
@@ -91,8 +91,8 @@ public final class HudDragController {
     }
 
     /**
-     * Ajuste fino pelas setas. Passa pelo mesmo caminho do arrasto para herdar o travamento na
-     * tela e a re-ancoragem, em vez de somar no offset por fora e divergir do mouse.
+     * Arrow-key nudge. Goes through the same path as dragging so it inherits the on-screen clamp
+     * and the re-anchoring, instead of adding to the offset externally and diverging from the mouse.
      */
     public void nudge(int deltaX, int deltaY, int screenWidth, int screenHeight) {
         if (lastLayout == null) {
@@ -102,7 +102,7 @@ public final class HudDragController {
     }
 
     /**
-     * Converte a posicao arrastada de volta em ancora + offset, invertendo exatamente o calculo de
+     * Converts the dragged position back into anchor + offset, inverting exactly the math of
      * {@link HudLayout#compute}.
      */
     private void applyOrigin(double originX, double originY, int screenWidth, int screenHeight) {
@@ -113,7 +113,7 @@ public final class HudDragController {
         int blockWidth = lastLayout.width();
         int blockHeight = lastLayout.height();
 
-        // Preso a tela: a area agarravel e o proprio bloco, entao deixa-lo sair seria perde-lo.
+        // Clamped to the screen: the grabbable area is the block itself, so letting it leave would lose it.
         double clampedX = Mth.clamp(originX, 0.0, Math.max(0.0, scaledWidth - (double) blockWidth));
         double clampedY = Mth.clamp(originY, 0.0, Math.max(0.0, scaledHeight - (double) blockHeight));
 
@@ -129,7 +129,7 @@ public final class HudDragController {
         dirty = true;
     }
 
-    /** Contorno da area agarravel. */
+    /** Outline of the grabbable area. */
     public void drawOutline(GuiGraphics graphics) {
         if (lastLayout == null) {
             return;

@@ -1,9 +1,9 @@
 package com.merlin.spellcooldownhud.config;
 
-/** Quais magias entram na HUD. */
+/** Which spells the HUD shows. */
 public enum ContentMode {
-    /** So as que estao em cooldown: aparecem ao usar e somem quando ficam prontas. */
+    /** Only spells on cooldown: they appear on cast and vanish when ready. */
     ONLY_ON_COOLDOWN,
-    /** Todas as magias equipadas, o tempo todo, indicando quais estao em cooldown. */
+    /** All equipped spells, all the time, marking which are on cooldown. */
     ALL_EQUIPPED
 }

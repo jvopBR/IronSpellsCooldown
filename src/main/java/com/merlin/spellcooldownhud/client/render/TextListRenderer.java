@@ -10,9 +10,10 @@ import net.minecraft.network.chat.Component;
 import java.util.List;
 
 /**
- * Lista compacta de texto: nome da magia a esquerda, tempo restante a direita.
+ * Compact text list: spell name on the left, remaining time on the right.
  *
- * <p>O estilo mais leve e discreto -- util para quem quer a informacao sem icones ocupando a tela.
+ * <p>The lightest, most discreet style -- handy for those who want the info without icons taking up
+ * the screen.
  */
 public final class TextListRenderer implements CooldownRenderer {
 
@@ -21,7 +22,7 @@ public final class TextListRenderer implements CooldownRenderer {
     private static final int PADDING_X = 3;
     private static final int PADDING_Y = 1;
 
-    /** Espaco minimo entre o nome e o tempo, para nao encostarem um no outro. */
+    /** Minimum gap between the name and the time, so they don't touch. */
     private static final int COLUMN_GAP = 8;
 
     private TextListRenderer() {
@@ -60,7 +61,7 @@ public final class TextListRenderer implements CooldownRenderer {
         int textY = y + PADDING_Y;
         int cursorX = x + PADDING_X;
 
-        // No modo texto o icone e opcional e vai pequeno, do tamanho da linha.
+        // In text mode the icon is optional and drawn small, the height of a line.
         if (HudConfig.SHOW_ICON.get()) {
             int small = lineHeight();
             RenderSupport.drawIcon(graphics, entry.icon(), cursorX, textY, small, alpha, entry.schoolColor());

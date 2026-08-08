@@ -17,20 +17,20 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Mantem o estado de animacao das entradas entre um tick e outro.
+ * Keeps the entries' animation state between ticks.
  *
- * <p>Existe porque a fonte de dados nao basta sozinha: no modo {@code ONLY_ON_COOLDOWN} o Iron's
- * Spells remove a magia do mapa no instante em que ela fica pronta, entao sem guardar estado
- * proprio o icone sumiria de um frame para o outro, sem fade e sem o brilho de "pronta".
+ * <p>It exists because the data source isn't enough on its own: in {@code ONLY_ON_COOLDOWN} mode
+ * Iron's Spells removes the spell from the map the instant it becomes ready, so without our own
+ * state the icon would vanish from one frame to the next, with no fade and no "ready" flash.
  *
- * <p>Os tempos sao medidos em relogio de parede, nao em ticks, para o fade ficar suave em
- * qualquer framerate -- 20 ticks/s dariam uma animacao granulada num monitor de 144 Hz.
+ * <p>Times are measured on the wall clock, not in ticks, so the fade stays smooth at any framerate
+ * -- 20 ticks/s would give a grainy animation on a 144 Hz monitor.
  *
- * <p>Nao e thread-safe de proposito: tick de cliente e render rodam na mesma thread.
+ * <p>Not thread-safe on purpose: client tick and render run on the same thread.
  */
 public final class CooldownTracker {
 
-    /** Duracao do brilho de "ficou pronta". Curto de proposito: e um flash, nao uma animacao. */
+    /** Duration of the "became ready" flash. Short on purpose: it's a flash, not an animation. */
     private static final long READY_FLASH_MS = 400L;
 
     private static final long MS_PER_TICK = 50L;
@@ -42,16 +42,16 @@ public final class CooldownTracker {
         this.source = source;
     }
 
-    /** Uma entrada pronta para desenhar: o dado + o estado de animacao ja resolvido. */
+    /** An entry ready to draw: the data plus the resolved animation state. */
     public record TrackedEntry(CooldownEntry entry, float alpha, float readyFlash) {
     }
 
     private static final class Tracked {
         private CooldownEntry entry;
         private final long firstSeenMs;
-        /** Quando a magia deixou de aparecer na fonte; 0 enquanto presente. */
+        /** When the spell stopped appearing in the source; 0 while present. */
         private long goneSinceMs;
-        /** Quando ficou pronta, para o brilho; 0 se ainda nao ficou. */
+        /** When it became ready, for the flash; 0 if it hasn't yet. */
         private long becameReadyMs;
 
         private Tracked(CooldownEntry entry, long nowMs) {
@@ -64,7 +64,7 @@ public final class CooldownTracker {
         tracked.clear();
     }
 
-    /** Chamado a cada tick de cliente (ou por frame, no preview do editor). */
+    /** Called every client tick (or per frame, in the editor preview). */
     public void refresh(ContentMode mode) {
         long now = System.currentTimeMillis();
         long fadeOutMs = HudConfig.FADE_OUT_TICKS.get() * MS_PER_TICK;
@@ -80,8 +80,8 @@ public final class CooldownTracker {
                 continue;
             }
 
-            // Transicao de "em cooldown" para "pronta" dispara o brilho, mesmo que a entrada
-            // continue na lista (caso do modo ALL_EQUIPPED).
+            // The "on cooldown" -> "ready" transition triggers the flash, even if the entry stays
+            // in the list (the ALL_EQUIPPED case).
             if (!existing.entry.ready() && fresh.ready()) {
                 existing.becameReadyMs = now;
             }
@@ -89,7 +89,7 @@ public final class CooldownTracker {
             existing.goneSinceMs = 0L;
         }
 
-        // O que a fonte parou de reportar: marca a saida e mantem vivo durante o fade-out.
+        // What the source stopped reporting: mark the exit and keep it alive during the fade-out.
         Iterator<Map.Entry<String, Tracked>> iterator = tracked.entrySet().iterator();
         while (iterator.hasNext()) {
             Map.Entry<String, Tracked> mapping = iterator.next();
@@ -101,18 +101,18 @@ public final class CooldownTracker {
             if (candidate.goneSinceMs == 0L) {
                 candidate.goneSinceMs = now;
                 if (candidate.becameReadyMs == 0L) {
-                    // Sumiu do mapa de cooldowns: no Iron's Spells isso significa que ficou pronta.
+                    // Gone from the cooldown map: in Iron's Spells that means it became ready.
                     candidate.becameReadyMs = now;
                 }
             }
-            // Com fadeOutMs = 0 a condicao vale de imediato, que e justamente "sem fade".
+            // With fadeOutMs = 0 the condition holds immediately, which is exactly "no fade".
             if (now - candidate.goneSinceMs >= fadeOutMs) {
                 iterator.remove();
             }
         }
     }
 
-    /** Entradas a desenhar neste frame, ja ordenadas, cortadas e com alpha resolvido. */
+    /** Entries to draw this frame, already sorted, capped and with alpha resolved. */
     public List<TrackedEntry> snapshot(ContentMode mode, SortMode sortMode, int maxEntries) {
         long now = System.currentTimeMillis();
         float globalOpacity = HudConfig.OPACITY.get().floatValue();
@@ -178,8 +178,8 @@ public final class CooldownTracker {
     }
 
     private static Comparator<CooldownEntry> comparatorFor(SortMode mode) {
-        // spellId como desempate em todos os modos: sem isso, entradas empatadas trocariam de
-        // lugar entre frames e a HUD ficaria tremendo.
+        // spellId as the tiebreaker in every mode: without it, tied entries would swap places
+        // between frames and the HUD would jitter.
         Comparator<CooldownEntry> tieBreaker = Comparator.comparing(CooldownEntry::spellId);
 
         return switch (mode) {
@@ -188,7 +188,7 @@ public final class CooldownTracker {
             case TIME_REMAINING_DESC ->
                     Comparator.comparingInt(CooldownEntry::remainingTicks).reversed().thenComparing(tieBreaker);
             case SLOT_ORDER ->
-                    // slotIndex -1 (magia nao equipada, ex. pergaminho) vai para o fim.
+                    // slotIndex -1 (unequipped spell, e.g. scroll) goes to the end.
                     Comparator.comparingInt((CooldownEntry e) -> e.slotIndex() < 0 ? Integer.MAX_VALUE : e.slotIndex())
                             .thenComparing(tieBreaker);
             case NAME ->

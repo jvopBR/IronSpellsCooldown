@@ -13,50 +13,48 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Corrige o cooldown do cliente pelo relogio do servidor.
+ * Corrects the client's cooldown against the server clock.
  *
- * <h2>O problema</h2>
- * O Iron's Spells sincroniza o cooldown uma unica vez, quando ele comeca
- * ({@code SyncCooldownPacket}), e depois o cliente decrementa sozinho em
- * {@code ClientPlayerEvents.onPlayerTick} -- 20 vezes por segundo, fixo. Nao existe resync
- * periodico: {@code PlayerCooldowns.syncToPlayer} so e chamado em login e respawn.
+ * <h2>The problem</h2>
+ * Iron's Spells syncs a cooldown once, when it starts ({@code SyncCooldownPacket}), then the client
+ * decrements it on its own in {@code ClientPlayerEvents.onPlayerTick} -- 20 times a second, fixed.
+ * There is no periodic resync: {@code PlayerCooldowns.syncToPlayer} only runs on login and respawn.
  *
- * <p>Como o cliente sempre roda a 20 ticks/s mas o servidor roda a TPS reais, num servidor
- * lagado a contagem do cliente corre mais rapido que a do servidor. O numero na tela chega a
- * zero enquanto a magia ainda esta em cooldown de verdade -- e a HUD passa a mentir justamente
- * quando mais importa.
+ * <p>Since the client always runs at 20 ticks/s but the server runs at its real TPS, on a lagging
+ * server the client's count runs faster than the server's. The number hits zero while the spell is
+ * still on cooldown -- and the HUD starts lying exactly when it matters most.
  *
- * <h2>A correcao</h2>
- * Ao ver um cooldown pela primeira vez, gravamos em que <em>tempo de jogo</em> ele termina:
- * {@code fim = gameTime + ticksRestantes}. Dali em diante o restante e sempre
- * {@code fim - gameTime}.
+ * <h2>The fix</h2>
+ * The first time we see a cooldown, we record the <em>game time</em> at which it ends:
+ * {@code end = gameTime + ticksRemaining}. From then on the remaining time is always
+ * {@code end - gameTime}.
  *
- * <p>Isso e exato, e nao uma estimativa, porque o tempo de jogo avanca 1 por tick de servidor --
- * o mesmo compasso do decremento do cooldown -- e o servidor o corrige no cliente a cada 20
- * ticks (ver {@link ServerClock}). O TPS medido nao entra nesta conta; ele so serve para
- * converter os ticks restantes em segundos na hora de exibir.
+ * <p>This is exact, not an estimate, because game time advances by 1 per server tick -- the same
+ * pace as the cooldown decrement -- and the server corrects it on the client every 20 ticks (see
+ * {@link ServerClock}). The measured TPS doesn't enter this calculation; it only converts the
+ * remaining ticks into seconds for display.
  *
- * <h2>Limpeza autoritativa (ex. /clearCooldowns)</h2>
- * O comando {@code /clearCooldowns} do Iron's Spells limpa os cooldowns no servidor e sincroniza
- * para o cliente, entao a magia some do mapa mesmo com tempo "natural" ainda restante. Isso e
- * indistinguivel de "o cliente contou rapido demais" olhando so o mapa -- mas nao olhando o
- * ultimo contador CLIENT-SIDE: o cliente so remove uma entrada por expiracao quando o proprio
- * contador dele chega a zero. Se a magia sumiu com muito tempo client-side ainda restante, foi
- * limpeza/resync, e a entrada NAO deve ser ressuscitada (ver {@link #collectDroppedEarly}).
+ * <h2>Authoritative clearing (e.g. /clearCooldowns)</h2>
+ * The Iron's Spells {@code /clearCooldowns} command clears cooldowns on the server and syncs to the
+ * client, so the spell vanishes from the map even with "natural" time still left. That's
+ * indistinguishable from "the client counted too fast" by the map alone -- but not by the last
+ * CLIENT-SIDE counter: the client only removes an entry by expiry when its own counter hits zero.
+ * If the spell vanished with a lot of client-side time still left, it was a clear/resync, and the
+ * entry must NOT be resurrected (see {@link #collectDroppedEarly}).
  */
 public final class ServerSyncedSource implements CooldownSource {
 
     /**
-     * Folga antes de tratar um valor como recast. O cliente conta mais rapido, entao o restante
-     * dele nunca deveria passar do previsto; quando passa com folga, a magia foi lancada de novo.
+     * Slack before treating a value as a recast. The client counts faster, so its remaining should
+     * never exceed the prediction; when it does with slack, the spell was cast again.
      */
     private static final int RECAST_TOLERANCE_TICKS = 5;
 
     /**
-     * Quanto o contador client-side pode faltar e ainda contar como expiracao natural. O cliente
-     * decrementa ate ~0 antes de remover uma entrada, entao o ultimo valor visto e sempre baixo;
-     * se a magia sumiu com bem mais que isto restando, foi limpeza autoritativa (/clearCooldowns)
-     * ou um resync do servidor, nao expiracao -- e a magia esta realmente pronta.
+     * How much the client-side counter may have left and still count as natural expiry. The client
+     * decrements to ~0 before removing an entry, so the last value seen is always low; if the spell
+     * vanished with much more than this left, it was an authoritative clear (/clearCooldowns) or a
+     * server resync, not expiry -- and the spell is actually ready.
      */
     private static final int NATURAL_EXPIRY_TOLERANCE_TICKS = 3;
 
@@ -69,7 +67,7 @@ public final class ServerSyncedSource implements CooldownSource {
 
     private static final class Anchor {
         private long endGameTime;
-        /** Ultima versao vista da entrada, para redesenha-la se o cliente derrubar cedo demais. */
+        /** Last seen version of the entry, to redraw it if the client drops it too early. */
         private CooldownEntry lastSeen;
     }
 
@@ -95,7 +93,7 @@ public final class ServerSyncedSource implements CooldownSource {
         return out;
     }
 
-    /** Ancora a entrada (ou reancora, se foi relancada) e devolve com o restante corrigido. */
+    /** Anchors the entry (or re-anchors, if it was recast) and returns it with the corrected remaining. */
     private CooldownEntry reconcile(CooldownEntry entry, long gameTime) {
         Anchor anchor = anchors.get(entry.spellId());
 
@@ -122,9 +120,9 @@ public final class ServerSyncedSource implements CooldownSource {
     }
 
     /**
-     * Magias que o cliente ja tirou da lista por ter contado rapido demais, mas que o servidor
-     * ainda tem em cooldown. Sem isto a HUD mostraria a magia como pronta antes da hora, que e
-     * exatamente o erro que este decorator existe para consertar.
+     * Spells the client already dropped from the list by counting too fast, but that the server
+     * still has on cooldown. Without this the HUD would show the spell as ready too early, which is
+     * exactly the bug this decorator exists to fix.
      */
     private void collectDroppedEarly(ContentMode mode, long gameTime,
                                      Set<String> seen, List<CooldownEntry> out) {
@@ -143,16 +141,16 @@ public final class ServerSyncedSource implements CooldownSource {
                 continue;
             }
 
-            // Se a entrada sumiu com o contador client-side ainda alto, foi /clearCooldowns ou um
-            // resync do servidor -- a magia esta pronta de verdade. So expiracao natural (contador
-            // client-side perto de zero) merece ser ressuscitada pelo tempo do servidor.
+            // If the entry vanished with the client-side counter still high, it was /clearCooldowns
+            // or a server resync -- the spell is genuinely ready. Only natural expiry (client-side
+            // counter near zero) deserves to be resurrected by server time.
             if (anchor.lastSeen.remainingTicks() > NATURAL_EXPIRY_TOLERANCE_TICKS) {
                 iterator.remove();
                 continue;
             }
 
-            // So em ONLY_ON_COOLDOWN: em ALL_EQUIPPED, ausencia significa magia desequipada, e
-            // trazer de volta uma magia que o player tirou do spellbook seria errado.
+            // Only in ONLY_ON_COOLDOWN: in ALL_EQUIPPED, absence means the spell was unequipped, and
+            // bringing back a spell the player removed from the spellbook would be wrong.
             if (mode == ContentMode.ONLY_ON_COOLDOWN) {
                 out.add(anchor.lastSeen.withRemaining((int) remaining));
             }

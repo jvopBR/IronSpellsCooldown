@@ -4,15 +4,14 @@ import com.merlin.spellcooldownhud.config.Anchor;
 import com.merlin.spellcooldownhud.config.GrowDirection;
 
 /**
- * Converte ancora, offset, direcao e quebra de linha em coordenadas concretas.
+ * Turns anchor, offset, direction and line wrapping into concrete coordinates.
  *
- * <p>Fica separado do render porque o editor precisa exatamente do mesmo calculo para saber onde
- * desenhar o retangulo de arrasto -- se o editor tivesse a propria conta, a HUD sairia do lugar
- * ao soltar o mouse.
+ * <p>Kept separate from the render because the editor needs the exact same math to know where to
+ * draw the drag rectangle -- if the editor had its own, the HUD would jump on mouse release.
  *
- * @param originX    canto superior esquerdo do bloco, ja com ancora e offset aplicados
- * @param cellWidth  largura de uma entrada; depende do estilo
- * @param maxPerLine entradas por linha (direcao horizontal) ou por coluna (vertical)
+ * @param originX    top-left corner of the block, with anchor and offset already applied
+ * @param cellWidth  width of one entry; depends on the style
+ * @param maxPerLine entries per row (horizontal direction) or per column (vertical)
  */
 public record HudLayout(
         int originX,
@@ -56,12 +55,12 @@ public record HudLayout(
                 cellWidth, cellHeight, spacing, direction, perLine);
     }
 
-    /** X absoluto da entrada de indice {@code index}. */
+    /** Absolute X of the entry at {@code index}. */
     public int cellX(int index) {
         int step = cellWidth + spacing;
         if (direction.horizontal()) {
             int column = index % maxPerLine;
-            // Crescendo para a esquerda, a primeira entrada encosta na borda direita do bloco.
+            // Growing leftward, the first entry sits against the block's right edge.
             return direction.reversed()
                     ? originX + width - cellWidth - column * step
                     : originX + column * step;
@@ -69,7 +68,7 @@ public record HudLayout(
         return originX + (index / maxPerLine) * step;
     }
 
-    /** Y absoluto da entrada de indice {@code index}. */
+    /** Absolute Y of the entry at {@code index}. */
     public int cellY(int index) {
         int step = cellHeight + spacing;
         if (direction.horizontal()) {

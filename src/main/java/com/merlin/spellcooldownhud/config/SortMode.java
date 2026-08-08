@@ -1,13 +1,13 @@
 package com.merlin.spellcooldownhud.config;
 
-/** Ordem das entradas na HUD. */
+/** Order of entries on the HUD. */
 public enum SortMode {
-    /** Quem fica pronto primeiro aparece primeiro. */
+    /** Ready-soonest first. */
     TIME_REMAINING_ASC,
-    /** Quem tem mais tempo pela frente aparece primeiro. */
+    /** Most time remaining first. */
     TIME_REMAINING_DESC,
-    /** Ordem dos slots do spellbook -- estavel, os icones nao pulam de lugar. */
+    /** Spellbook slot order -- stable, icons don't jump around. */
     SLOT_ORDER,
-    /** Alfabetica pelo nome da magia. */
+    /** Alphabetical by spell name. */
     NAME
 }

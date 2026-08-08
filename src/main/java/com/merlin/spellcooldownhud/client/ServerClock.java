@@ -5,30 +5,25 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.util.Mth;
 
 /**
- * Relogio do servidor visto do cliente: tempo de jogo autoritativo e TPS estimado.
+ * Server clock seen from the client: authoritative game time and estimated TPS.
  *
- * <p>Por que isto funciona sem mixin nenhum: o servidor envia {@code ClientboundSetTimePacket} a
- * cada 20 ticks de servidor e o cliente <em>crava</em> o valor recebido em
- * {@code ClientLevel.setGameTime}. Entre um pacote e outro o cliente avanca o contador sozinho a
- * 20/s, mas as correcoes periodicas puxam tudo de volta -- entao, medido numa janela de alguns
- * segundos, o tempo de jogo avanca exatamente na taxa real de ticks do servidor.
- *
- * <p>O tempo de jogo e global (dimensoes que nao a principal usam {@code DerivedLevelData}) e
- * monotonico, avancando 1 por tick de servidor. E o mesmo compasso em que o Iron's Spells
- * decrementa os cooldowns, o que e justamente o que permite ancorar o fim de um cooldown nele.
+ * <p>No mixin needed: the server sends {@code ClientboundSetTimePacket} every 20 ticks and the
+ * client hard-sets the value, so over a few seconds game time advances at the server's real tick
+ * rate. Game time is global and monotonic (1 per server tick) -- the same pace Iron's Spells
+ * decrements cooldowns, which is what lets us anchor a cooldown's end to it.
  */
 public final class ServerClock {
 
-    /** 5 segundos de amostras a 20 ticks de cliente por segundo. */
+    /** 5 seconds of samples at 20 client ticks per second. */
     private static final int SAMPLE_CAPACITY = 100;
 
     /**
-     * Janela minima antes de confiar na medicao. A correcao do servidor so chega a cada 20 ticks,
-     * entao janelas curtas medem a contagem local do cliente e dariam 20 TPS sempre.
+     * Minimum window before the measurement is trustworthy. Server corrections arrive only every
+     * 20 ticks, so shorter windows just measure the client's local 20/s count and read 20 TPS.
      */
     private static final long MIN_WINDOW_NANOS = 2_000_000_000L;
 
-    /** Salto para tras (mundo novo) ou para frente absurdo (cliente congelado): recomeca. */
+    /** Backward jump (new world) or absurd forward jump (frozen client): restart. */
     private static final long JUMP_RESET_TICKS = 200L;
 
     private static final float NOMINAL_TPS = 20.0f;
@@ -46,18 +41,18 @@ public final class ServerClock {
     private ServerClock() {
     }
 
-    /** Tempo de jogo atual do servidor, ou 0 fora de um mundo. */
+    /** Current server game time, or 0 outside a world. */
     public static long gameTime() {
         ClientLevel level = Minecraft.getInstance().level;
         return level == null ? 0L : level.getGameTime();
     }
 
-    /** TPS estimado do servidor, entre 0 e 20. Vale {@value #NOMINAL_TPS} ate haver medicao. */
+    /** Estimated server TPS, 0..20. Reads {@value #NOMINAL_TPS} until measured. */
     public static float tps() {
         return smoothedTps;
     }
 
-    /** True quando ja houve janela suficiente para a medicao valer alguma coisa. */
+    /** True once there has been enough window for the measurement to mean something. */
     public static boolean isReliable() {
         return reliable;
     }
@@ -70,7 +65,7 @@ public final class ServerClock {
         reliable = false;
     }
 
-    /** Chamado uma vez por tick de cliente. */
+    /** Called once per client tick. */
     public static void tick() {
         ClientLevel level = Minecraft.getInstance().level;
         if (level == null) {
@@ -111,8 +106,8 @@ public final class ServerClock {
         float measured = (float) (elapsedTicks * 1_000_000_000.0 / elapsedNanos);
         measured = Mth.clamp(measured, 0.0f, NOMINAL_TPS);
 
-        // Media exponencial: o sinal e serrilhado entre uma correcao do servidor e a proxima, e
-        // um numero pulando na tela seria pior do que um numero levemente atrasado.
+        // Exponential average: the signal is jagged between server corrections, and a number
+        // jumping on screen is worse than one that lags slightly behind.
         smoothedTps = reliable ? smoothedTps * 0.9f + measured * 0.1f : measured;
         reliable = true;
     }

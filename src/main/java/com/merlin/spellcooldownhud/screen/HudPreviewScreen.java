@@ -1,10 +1,10 @@
 package com.merlin.spellcooldownhud.screen;
 
 /**
- * Marca as telas que desenham o proprio preview da HUD.
+ * Marks the screens that draw their own HUD preview.
  *
- * <p>{@link com.merlin.spellcooldownhud.client.HudLayer} pula o desenho normal enquanto uma delas
- * estiver aberta, senao a HUD sairia em dobro -- uma vez pela camada de GUI e outra pelo preview.
+ * <p>{@link com.merlin.spellcooldownhud.client.HudLayer} skips the normal drawing while one of them
+ * is open, otherwise the HUD would show twice -- once from the GUI layer and once from the preview.
  */
 public interface HudPreviewScreen {
 }

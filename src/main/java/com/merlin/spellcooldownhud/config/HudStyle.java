@@ -1,11 +1,11 @@
 package com.merlin.spellcooldownhud.config;
 
-/** Como cada cooldown e desenhado. */
+/** How each cooldown is drawn. */
 public enum HudStyle {
-    /** Icone com varredura radial escura por cima, estilo WoW/LoL. */
+    /** Icon with a dark radial sweep on top, WoW/LoL style. */
     RADIAL,
-    /** Icone com barra de progresso horizontal embaixo. */
+    /** Icon with a horizontal progress bar below it. */
     BAR,
-    /** Somente texto: nome da magia e tempo restante. */
+    /** Text only: spell name and remaining time. */
     TEXT_LIST
 }

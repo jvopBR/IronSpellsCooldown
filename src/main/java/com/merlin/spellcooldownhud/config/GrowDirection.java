@@ -1,6 +1,6 @@
 package com.merlin.spellcooldownhud.config;
 
-/** Direcao em que as entradas se acumulam a partir da ancora. */
+/** Direction in which entries stack from the anchor. */
 public enum GrowDirection {
     RIGHT,
     LEFT,
@@ -11,7 +11,7 @@ public enum GrowDirection {
         return this == RIGHT || this == LEFT;
     }
 
-    /** True quando as entradas caminham no sentido negativo do eixo (esquerda ou para cima). */
+    /** True when entries walk in the negative axis direction (left or up). */
     public boolean reversed() {
         return this == LEFT || this == UP;
     }

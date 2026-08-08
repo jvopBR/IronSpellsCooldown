@@ -5,11 +5,11 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 import java.util.Locale;
 
 /**
- * Cor guardada no config como hex legivel ("#AARRGGBB" ou "#RRGGBB") e lida como int ARGB.
+ * A color stored in the config as readable hex ("#AARRGGBB" or "#RRGGBB") and read as an ARGB int.
  *
- * <p>A HUD desenha a cada frame, entao reparsear a string toda vez seria desperdicio. Esta classe
- * guarda o ultimo texto visto e so reparseia quando ele muda -- o que, de quebra, faz o valor
- * acompanhar reloads de config e edicoes feitas no editor sem nenhuma invalidacao manual.
+ * <p>The HUD draws every frame, so reparsing the string each time would be wasteful. This class
+ * keeps the last seen text and only reparses when it changes -- which, as a bonus, makes the value
+ * follow config reloads and edits made in the editor without any manual invalidation.
  */
 public final class CachedColor {
     private final ModConfigSpec.ConfigValue<String> value;
@@ -24,7 +24,7 @@ public final class CachedColor {
         this.cached = fallback;
     }
 
-    /** O valor cru, para o editor escrever. */
+    /** The raw value, for the editor to write to. */
     public ModConfigSpec.ConfigValue<String> raw() {
         return value;
     }
@@ -42,13 +42,13 @@ public final class CachedColor {
         value.set(toHex(argb));
     }
 
-    /** Aceita "#RRGGBB", "#AARRGGBB", com ou sem "#"/"0x". Texto invalido cai no padrao. */
+    /** Accepts "#RRGGBB", "#AARRGGBB", with or without "#"/"0x". Invalid text falls back to default. */
     public static int parse(String raw, int fallback) {
         String hex = strip(raw);
         try {
             return switch (hex.length()) {
                 case 6 -> 0xFF000000 | Integer.parseInt(hex, 16);
-                // parseLong porque valores com alpha alto estouram o range positivo de int
+                // parseLong because high-alpha values overflow int's positive range
                 case 8 -> (int) Long.parseLong(hex, 16);
                 default -> fallback;
             };
@@ -61,7 +61,7 @@ public final class CachedColor {
         return String.format(Locale.ROOT, "#%08X", argb);
     }
 
-    /** Validador usado no {@code define} do config, para o TOML rejeitar lixo na hora de carregar. */
+    /** Validator used in the config {@code define}, so the TOML rejects garbage at load time. */
     public static boolean isValid(Object raw) {
         if (!(raw instanceof String text)) {
             return false;

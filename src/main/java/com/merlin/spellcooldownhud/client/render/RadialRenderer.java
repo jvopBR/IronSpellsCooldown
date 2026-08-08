@@ -8,9 +8,9 @@ import net.minecraft.client.gui.GuiGraphics;
 import java.util.List;
 
 /**
- * Icone com varredura circular escura por cima e o tempo restante no centro.
+ * Icon with a dark circular sweep on top and the remaining time in the center.
  *
- * <p>E o estilo mais legivel de bater o olho: da para estimar quanto falta sem ler o numero.
+ * <p>The most at-a-glance readable style: you can estimate how much is left without reading the number.
  */
 public final class RadialRenderer implements CooldownRenderer {
 
@@ -24,7 +24,7 @@ public final class RadialRenderer implements CooldownRenderer {
         if (!HudConfig.SHOW_NAME.get()) {
             return iconSize;
         }
-        // Com nome, todas as celulas usam a largura do nome mais longo para as colunas alinharem.
+        // With names, every cell uses the widest name's width so the columns align.
         int widest = 0;
         for (CooldownTracker.TrackedEntry tracked : entries) {
             widest = Math.max(widest, RenderSupport.font().width(tracked.entry().displayName().getString()));
@@ -49,7 +49,7 @@ public final class RadialRenderer implements CooldownRenderer {
             RenderSupport.drawIcon(graphics, entry.icon(), x, y, iconSize, alpha, entry.schoolColor());
         }
 
-        // A varredura cobre a parte que ainda falta, encolhendo conforme o cooldown corre.
+        // The sweep covers the part still remaining, shrinking as the cooldown runs.
         RenderSupport.drawRadialSweep(graphics, x, y, iconSize,
                 entry.remainingFraction(), RenderSupport.sweepColor(alpha));
 

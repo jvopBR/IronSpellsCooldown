@@ -9,10 +9,10 @@ import net.minecraft.util.Mth;
 import java.util.List;
 
 /**
- * Icone com barra de progresso horizontal embaixo.
+ * Icon with a horizontal progress bar below it.
  *
- * <p>Combina melhor com a estetica retangular do Minecraft do que a varredura circular, e a barra
- * e mais facil de acompanhar de canto de olho em cooldowns longos.
+ * <p>Fits Minecraft's rectangular look better than the circular sweep, and the bar is easier to
+ * track out of the corner of your eye on long cooldowns.
  */
 public final class BarRenderer implements CooldownRenderer {
 
@@ -21,7 +21,7 @@ public final class BarRenderer implements CooldownRenderer {
     private static final int BAR_HEIGHT = 3;
     private static final int BAR_GAP = 1;
 
-    /** Quanto o icone escurece enquanto a magia esta em cooldown, no modo ALL_EQUIPPED. */
+    /** How much the icon dims while the spell is on cooldown, in ALL_EQUIPPED mode. */
     private static final float DIM_STRENGTH = 0.55f;
 
     private BarRenderer() {
@@ -53,7 +53,7 @@ public final class BarRenderer implements CooldownRenderer {
         graphics.fill(x, y, x + iconSize, y + iconSize, RenderSupport.backgroundColor(alpha));
 
         if (HudConfig.SHOW_ICON.get()) {
-            // Sem varredura por cima, o escurecimento e o que diferencia "em cooldown" de "pronta".
+            // With no sweep on top, the dimming is what tells "on cooldown" from "ready".
             float iconAlpha = HudConfig.DIM_WHEN_READY.get() && !entry.ready()
                     ? alpha * (1.0f - DIM_STRENGTH)
                     : alpha;
@@ -77,7 +77,7 @@ public final class BarRenderer implements CooldownRenderer {
         }
     }
 
-    /** Trilho escuro com a porcao restante preenchida na cor da escola (ou da borda). */
+    /** Dark rail with the remaining portion filled in the school color (or the border color). */
     private static void drawBar(GuiGraphics graphics, CooldownEntry entry,
                                 int x, int y, int width, float alpha) {
         graphics.fill(x, y, x + width, y + BAR_HEIGHT, RenderSupport.sweepColor(alpha));
@@ -86,7 +86,7 @@ public final class BarRenderer implements CooldownRenderer {
         if (fraction <= 0.0f) {
             return;
         }
-        // Pelo menos 1px enquanto houver cooldown, para a barra nao "piscar" para nada no fim.
+        // At least 1px while there's any cooldown, so the bar doesn't "blink" to nothing at the end.
         int filled = Math.max(1, Mth.ceil(width * fraction));
         graphics.fill(x, y, x + Math.min(width, filled), y + BAR_HEIGHT,
                 RenderSupport.borderColorFor(entry, alpha));

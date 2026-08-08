@@ -26,12 +26,11 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Editor da HUD: arraste para posicionar, ajuste tudo o resto nos controles, veja o resultado ao
- * vivo.
+ * The HUD editor: drag to position, tune everything else in the controls, see the result live.
  *
- * <p>O preview usa {@link DemoSource}, com cooldowns ficticios que correm sozinhos, e desenha pelo
- * MESMO caminho da HUD real ({@link HudLayer#draw}). Isso significa duas coisas: da para ajustar a
- * HUD parado no lobby, fora de combate, e o que se ve aqui e exatamente o que aparece em jogo.
+ * <p>The preview uses {@link DemoSource}, with fictitious cooldowns that run on their own, and draws
+ * through the SAME path as the real HUD ({@link HudLayer#draw}). That means two things: you can tune
+ * the HUD standing in the lobby, out of combat, and what you see here is exactly what appears in game.
  */
 public final class HudEditorScreen extends Screen implements HudPreviewScreen {
 
@@ -41,13 +40,13 @@ public final class HudEditorScreen extends Screen implements HudPreviewScreen {
 
     private static final int PANEL_WIDTH = 192;
     private static final int MARGIN = 8;
-    // Linhas compactas de proposito: a aba mais cheia tem 7 controles e o painel ainda precisa
-    // caber, com abas e rodape, numa tela de ~270px de altura (escala de GUI 4 em 1080p).
+    // Compact rows on purpose: the fullest tab has 7 controls and the panel still needs to fit,
+    // with tabs and footer, on a ~270px tall screen (GUI scale 4 at 1080p).
     private static final int ROW_HEIGHT = 18;
     private static final int ROW_GAP = 2;
     private static final int TAB_GAP = 4;
 
-    /** Passo do ajuste fino por setas; com Shift, dez vezes maior. */
+    /** Arrow-key nudge step; ten times larger with Shift. */
     private static final int NUDGE_STEP = 1;
     private static final int NUDGE_STEP_FAST = 10;
 
@@ -65,13 +64,13 @@ public final class HudEditorScreen extends Screen implements HudPreviewScreen {
         this.parent = parent;
     }
 
-    /** O jogo continua rodando atras: a HUD precisa ser ajustada em contexto, nao numa tela morta. */
+    /** The game keeps running behind: the HUD needs tuning in context, not on a dead screen. */
     @Override
     public boolean isPauseScreen() {
         return false;
     }
 
-    // ------------------------------------------------------------------ montagem
+    // ------------------------------------------------------------------ assembly
 
     @Override
     protected void init() {
@@ -109,7 +108,7 @@ public final class HudEditorScreen extends Screen implements HudPreviewScreen {
                 rebuildWidgets();
             }).bounds(x, rowY, buttonWidth, ROW_HEIGHT).build();
 
-            // O botao da aba atual fica inativo: e o indicador visual de onde voce esta.
+            // The current tab's button is inactive: it's the visual cue for where you are.
             button.active = candidate != tab;
             addRenderableWidget(button);
         }
@@ -210,7 +209,7 @@ public final class HudEditorScreen extends Screen implements HudPreviewScreen {
         box.setValue(value.get());
         box.setResponder(text -> {
             boolean valid = CachedColor.isValid(text);
-            // Vermelho enquanto o texto nao for um hex valido, em vez de gravar lixo no config.
+            // Red while the text isn't valid hex, instead of writing garbage to the config.
             box.setTextColor(valid ? 0xE0E0E0 : 0xFF5555);
             if (valid) {
                 value.set(text);
@@ -292,7 +291,7 @@ public final class HudEditorScreen extends Screen implements HudPreviewScreen {
         }
 
         private double current() {
-            // Arredondado a duas casas: o valor no TOML fica legivel em vez de 0.7300000000000001.
+            // Rounded to two decimals: the TOML value stays readable instead of 0.7300000000000001.
             return Math.round((min + value * (max - min)) * 100.0) / 100.0;
         }
 
@@ -312,11 +311,11 @@ public final class HudEditorScreen extends Screen implements HudPreviewScreen {
     // -------------------------------------------------------------------- render
 
     /**
-     * Vazio de proposito.
+     * Empty on purpose.
      *
-     * <p>{@code Screen.render} chamaria o padrao antes dos widgets, aplicando o blur do vanilla e
-     * o fundo de menu por cima do preview da HUD -- somando com o veu que ja desenhamos. O fundo
-     * desta tela e desenhado em {@link #render}, na ordem certa.
+     * <p>{@code Screen.render} would call the default before the widgets, applying the vanilla blur
+     * and the menu background over the HUD preview -- adding to the veil we already draw. This
+     * screen's background is drawn in {@link #render}, in the right order.
      */
     @Override
     public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
@@ -325,8 +324,8 @@ public final class HudEditorScreen extends Screen implements HudPreviewScreen {
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        // Fora de um mundo nao ha nada por tras; dentro dele, so um veu leve, para a HUD poder ser
-        // posicionada em relacao ao que esta na tela de verdade.
+        // Outside a world there's nothing behind; inside one, just a light veil so the HUD can be
+        // positioned relative to what's actually on screen.
         if (minecraft != null && minecraft.level == null) {
             super.renderBackground(graphics, mouseX, mouseY, partialTick);
         } else {
@@ -358,8 +357,8 @@ public final class HudEditorScreen extends Screen implements HudPreviewScreen {
     }
 
     /**
-     * Amostra da cor ao lado do campo. Sem ela da para gravar preto sobre fundo preto sem
-     * perceber -- o hex sozinho nao diz nada sobre legibilidade.
+     * Color swatch next to the field. Without it you could write black on a black background without
+     * noticing -- the hex alone says nothing about readability.
      */
     private void drawColorSwatch(GuiGraphics graphics, ColorRow row) {
         int size = ROW_HEIGHT - 6;
@@ -367,8 +366,8 @@ public final class HudEditorScreen extends Screen implements HudPreviewScreen {
         int y = row.y() + 3;
 
         graphics.fill(x - 1, y - 1, x + size + 1, y + size + 1, 0xFF000000);
-        // Xadrez claro/escuro por tras: assim uma cor com alpha baixo se revela transparente em
-        // vez de parecer uma cor solida qualquer.
+        // Light/dark checkerboard behind: that way a low-alpha color reveals itself as transparent
+        // instead of looking like just some solid color.
         graphics.fill(x, y, x + size, y + size, 0xFFFFFFFF);
         graphics.fill(x, y, x + size / 2, y + size / 2, 0xFF808080);
         graphics.fill(x + size / 2, y + size / 2, x + size, y + size, 0xFF808080);
@@ -383,8 +382,8 @@ public final class HudEditorScreen extends Screen implements HudPreviewScreen {
         graphics.drawString(font, Component.translatable("screen.spellcooldownhud.hint"),
                 x, y, 0xFFC8C8D2, true);
 
-        // TPS medido, so quando o servidor esta abaixo do nominal: e a evidencia de que a
-        // correcao de tempo esta agindo, e ajuda a diagnosticar "meu cooldown esta estranho".
+        // Measured TPS, only when the server is below nominal: it's the evidence the time correction
+        // is acting, and helps diagnose "my cooldown looks weird".
         if (ServerClock.isReliable() && ServerClock.tps() < 19.5f) {
             Component tps = Component.translatable("screen.spellcooldownhud.serverTps")
                     .append(String.format(Locale.ROOT, ": %.1f", ServerClock.tps()));
@@ -402,8 +401,8 @@ public final class HudEditorScreen extends Screen implements HudPreviewScreen {
         if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT) {
             return false;
         }
-        // O painel e opaco, entao cliques sobre ele nao viram arrasto. Para posicionar a HUD do
-        // lado esquerdo da tela existe a tela de mover, que nao tem painel.
+        // The panel is opaque, so clicks on it don't become drags. To position the HUD on the left
+        // side of the screen there's the move screen, which has no panel.
         return drag.beginDrag(mouseX, mouseY, PANEL_WIDTH);
     }
 
@@ -427,7 +426,7 @@ public final class HudEditorScreen extends Screen implements HudPreviewScreen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        // Ajuste fino por setas, desde que o foco nao esteja num campo de texto.
+        // Arrow-key nudge, as long as the focus isn't in a text field.
         if (!(getFocused() instanceof EditBox)) {
             int step = hasShiftDown() ? NUDGE_STEP_FAST : NUDGE_STEP;
             switch (keyCode) {
@@ -448,7 +447,7 @@ public final class HudEditorScreen extends Screen implements HudPreviewScreen {
                     return true;
                 }
                 default -> {
-                    // segue para o tratamento padrao
+                    // falls through to default handling
                 }
             }
         }
@@ -459,7 +458,7 @@ public final class HudEditorScreen extends Screen implements HudPreviewScreen {
         drag.nudge(deltaX, deltaY, width, height);
     }
 
-    // ------------------------------------------------------------------ ciclo de vida
+    // ------------------------------------------------------------------ lifecycle
 
     private void resetAll() {
         List<ModConfigSpec.ConfigValue<?>> values = List.of(
@@ -482,7 +481,7 @@ public final class HudEditorScreen extends Screen implements HudPreviewScreen {
         markDirty();
     }
 
-    /** Auxiliar so para capturar o parametro de tipo do ConfigValue no set. */
+    /** Helper just to capture the ConfigValue's type parameter in the set call. */
     private static <T> void restoreDefault(ModConfigSpec.ConfigValue<T> value) {
         value.set(value.getDefault());
     }
@@ -493,8 +492,8 @@ public final class HudEditorScreen extends Screen implements HudPreviewScreen {
 
     @Override
     public void onClose() {
-        // Grava uma vez ao sair, e nao a cada tique de slider, para nao reescrever o TOML dezenas
-        // de vezes durante um arrasto.
+        // Save once on close, not on every slider tick, so we don't rewrite the TOML dozens of
+        // times during a drag.
         if (drag.isDirty()) {
             HudConfig.SPEC.save();
             drag.clearDirty();
@@ -504,7 +503,7 @@ public final class HudEditorScreen extends Screen implements HudPreviewScreen {
         }
     }
 
-    // ------------------------------------------------------------------- auxiliares
+    // ------------------------------------------------------------------- helpers
 
     private static int contentWidth() {
         return PANEL_WIDTH - MARGIN * 2;

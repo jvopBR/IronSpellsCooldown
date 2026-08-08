@@ -3,11 +3,11 @@ package com.merlin.spellcooldownhud.config;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 /**
- * Config client do mod, gravado em {@code config/spellcooldownhud-client.toml}.
+ * The mod's client config, written to {@code config/spellcooldownhud-client.toml}.
  *
- * <p>Todos os valores sao lidos direto durante o render. Isso e barato porque
- * {@link ModConfigSpec.ConfigValue#get()} guarda o valor em cache e so o invalida em reload; as
- * cores, que precisariam de parse, passam por {@link CachedColor}.
+ * <p>Every value is read directly during render. That's cheap because
+ * {@link ModConfigSpec.ConfigValue#get()} caches the value and only invalidates it on reload;
+ * colors, which would need parsing, go through {@link CachedColor}.
  */
 public final class HudConfig {
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();

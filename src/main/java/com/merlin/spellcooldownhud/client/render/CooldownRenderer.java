@@ -7,25 +7,25 @@ import net.minecraft.client.gui.GuiGraphics;
 import java.util.List;
 
 /**
- * Desenha uma entrada de cooldown num estilo especifico.
+ * Draws a cooldown entry in a specific style.
  *
- * <p>O tamanho da celula e perguntado antes do desenho porque o {@link
- * com.merlin.spellcooldownhud.client.HudLayout} precisa dele para posicionar tudo -- e no estilo
- * de texto ele depende do conteudo, nao so do config.
+ * <p>The cell size is asked for before drawing because {@link
+ * com.merlin.spellcooldownhud.client.HudLayout} needs it to lay everything out -- and in the text
+ * style it depends on the content, not just the config.
  */
 public interface CooldownRenderer {
 
     /**
-     * Largura de uma celula. Recebe a lista inteira porque estilos de texto precisam medir a
-     * entrada mais larga para as colunas ficarem alinhadas.
+     * Width of one cell. Takes the whole list because text styles need to measure the widest entry
+     * so the columns line up.
      */
     int cellWidth(int iconSize, List<CooldownTracker.TrackedEntry> entries);
 
     int cellHeight(int iconSize);
 
     /**
-     * Desenha uma entrada. A largura da celula vem pronta do layout, e nao remedida aqui, para o
-     * desenho usar exatamente a mesma largura que posicionou a entrada.
+     * Draws one entry. The cell width comes ready from the layout, not remeasured here, so the
+     * drawing uses exactly the same width that positioned the entry.
      */
     void render(GuiGraphics graphics, CooldownTracker.TrackedEntry tracked,
                 int x, int y, int cellWidth, int iconSize);

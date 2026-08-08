@@ -7,15 +7,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Cooldowns falsos que correm sozinhos, para o preview ao vivo do editor.
+ * Fake cooldowns that run on their own, for the editor's live preview.
  *
- * <p>E o que permite ajustar posicao, cores e estilo sem estar em combate -- ou sem estar num
- * mundo. Repare que esta classe nao importa nada do Iron's Spells: ela pede as magias de amostra
- * a {@link IronSpellsSource#previewSamples(int)} e apenas anima os numeros.
+ * <p>This is what lets you tune position, colors and style without being in combat -- or even in a
+ * world. Note this class imports nothing from Iron's Spells: it asks {@link
+ * IronSpellsSource#previewSamples(int)} for sample spells and just animates the numbers.
  */
 public final class DemoSource implements CooldownSource {
 
-    /** Nomes usados so quando o registry ainda nao respondeu (ex. Iron's Spells ausente). */
+    /** Names used only when the registry hasn't answered yet (e.g. Iron's Spells absent). */
     private static final String[] PLACEHOLDER_NAMES = {
             "Fireball", "Ice Spike", "Blood Slash", "Teleport", "Heal", "Lightning Bolt"
     };
@@ -24,7 +24,7 @@ public final class DemoSource implements CooldownSource {
 
     @Override
     public List<CooldownEntry> collect(ContentMode mode) {
-        // No modo ALL_EQUIPPED faz sentido mostrar mais entradas, algumas ja prontas.
+        // In ALL_EQUIPPED it makes sense to show more entries, some already ready.
         int count = mode == ContentMode.ALL_EQUIPPED ? 6 : 4;
 
         List<CooldownEntry> samples = IronSpellsSource.previewSamples(count);
@@ -43,8 +43,8 @@ public final class DemoSource implements CooldownSource {
     }
 
     /**
-     * Faz o tempo restante decair e reiniciar em loop, com cada entrada defasada da anterior, para
-     * o preview mostrar varios estagios de cooldown ao mesmo tempo.
+     * Makes the remaining time decay and loop, each entry offset from the previous one, so the
+     * preview shows several cooldown stages at once.
      */
     private static int animatedRemaining(CooldownEntry sample, int index, long elapsedTicks) {
         int total = Math.max(1, sample.totalTicks());
@@ -60,7 +60,7 @@ public final class DemoSource implements CooldownSource {
             int total = 200 + i * 40;
             entries.add(new CooldownEntry(
                     "preview:" + name.toLowerCase(java.util.Locale.ROOT).replace(' ', '_'),
-                    null, // sem icone: os renderers desenham um quadrado colorido no lugar
+                    null, // no icon: the renderers draw a colored square instead
                     Component.literal(name),
                     1 + (i % 5),
                     total,

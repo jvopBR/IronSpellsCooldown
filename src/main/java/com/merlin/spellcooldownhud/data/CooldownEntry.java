@@ -5,21 +5,21 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 /**
- * Uma magia a ser desenhada na HUD, ja traduzida para tipos do Minecraft puro.
+ * A spell to draw on the HUD, already translated into plain Minecraft types.
  *
- * <p>Nenhum tipo do Iron's Spells aparece aqui de proposito: {@link IronSpellsSource} e a unica
- * classe que fala com aquela API, e ela entrega este record. Assim o resto do mod (tracker,
- * layout, renderers, editor) nao depende do Iron's Spells e consegue rodar com dados
- * sinteticos no preview do editor.
+ * <p>No Iron's Spells type appears here on purpose: {@link IronSpellsSource} is the only class that
+ * talks to that API, and it hands back this record. That way the rest of the mod (tracker, layout,
+ * renderers, editor) doesn't depend on Iron's Spells and can run on synthetic data in the editor
+ * preview.
  *
- * @param spellId        id do registry, ex. {@code irons_spellbooks:fireball}
- * @param icon           textura do icone, ja no caminho completo, ou null se a magia nao tiver
- * @param displayName    nome traduzido
- * @param level          nivel da magia; 0 quando desconhecido
- * @param remainingTicks ticks que faltam para ficar pronta; 0 = pronta
- * @param totalTicks     duracao total do cooldown, para calcular a fracao
- * @param schoolColor    RGB da escola da magia (sem alpha)
- * @param slotIndex      posicao no spellbook, para ordenacao estavel; -1 se desconhecida
+ * @param spellId        registry id, e.g. {@code irons_spellbooks:fireball}
+ * @param icon           icon texture, already a full path, or null if the spell has none
+ * @param displayName    translated name
+ * @param level          spell level; 0 when unknown
+ * @param remainingTicks ticks left until ready; 0 = ready
+ * @param totalTicks     total cooldown duration, to compute the fraction
+ * @param schoolColor    RGB of the spell's school (no alpha)
+ * @param slotIndex      position in the spellbook, for stable ordering; -1 if unknown
  */
 public record CooldownEntry(
         String spellId,
@@ -35,7 +35,7 @@ public record CooldownEntry(
         return remainingTicks <= 0;
     }
 
-    /** 1.0 logo apos o cast, 0.0 quando pronta -- e a fracao que a varredura/barra cobre. */
+    /** 1.0 right after the cast, 0.0 when ready -- the fraction the sweep/bar covers. */
     public float remainingFraction() {
         if (totalTicks <= 0) {
             return 0.0f;
@@ -44,10 +44,10 @@ public record CooldownEntry(
     }
 
     /**
-     * Copia com outro tempo restante.
+     * Copy with a different remaining time.
      *
-     * <p>Usada pelo preview do editor para animar sem dados reais e por
-     * {@link ServerSyncedSource} para substituir a contagem local do cliente pela do servidor.
+     * <p>Used by the editor preview to animate without real data, and by {@link ServerSyncedSource}
+     * to replace the client's local count with the server's.
      */
     public CooldownEntry withRemaining(int ticks) {
         return new CooldownEntry(spellId, icon, displayName, level, ticks, totalTicks, schoolColor, slotIndex);

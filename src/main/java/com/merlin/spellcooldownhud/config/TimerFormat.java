@@ -4,9 +4,9 @@ import net.minecraft.util.Mth;
 
 import java.util.Locale;
 
-/** Formato do numero de tempo restante. */
+/** Format of the remaining-time number. */
 public enum TimerFormat {
-    /** Segundos inteiros, arredondados para cima: "7s". */
+    /** Whole seconds, rounded up: "7s". */
     SECONDS {
         @Override
         public String format(float seconds) {
@@ -14,7 +14,7 @@ public enum TimerFormat {
         }
     },
 
-    /** Decimos abaixo de 10s ("3.4"), inteiros acima -- a precisao so importa perto do fim. */
+    /** Tenths below 10s ("3.4"), whole above -- precision only matters near the end. */
     TENTHS {
         @Override
         public String format(float seconds) {
@@ -24,7 +24,7 @@ public enum TimerFormat {
         }
     },
 
-    /** Relogio, para cooldowns longos: "1:05". */
+    /** Clock, for long cooldowns: "1:05". */
     MM_SS {
         @Override
         public String format(float seconds) {

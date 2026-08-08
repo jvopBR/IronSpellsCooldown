@@ -14,12 +14,12 @@ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import org.slf4j.Logger;
 
 /**
- * HUD de cooldown de magias do Iron's Spells 'n Spellbooks.
+ * Cooldown HUD for Iron's Spells 'n Spellbooks.
  *
- * <p>Inteiramente client-side: le o estado que o Iron's Spells ja sincroniza para o cliente
- * ({@code ClientMagicData}) e o desenha. Nao registra nenhum payload de rede, o que o mantem fora
- * da negociacao de mods do NeoForge -- por isso da para usa-lo num servidor que nao o tem
- * instalado, que e justamente o caso de uso.
+ * <p>Fully client-side: it reads the state Iron's Spells already syncs to the client
+ * ({@code ClientMagicData}) and draws it. It registers no network payload, which keeps it out of
+ * NeoForge's mod negotiation -- so you can use it on a server that doesn't have it installed, which
+ * is exactly the use case.
  */
 @Mod(value = SpellCooldownHud.MODID, dist = Dist.CLIENT)
 public final class SpellCooldownHud {
@@ -34,8 +34,8 @@ public final class SpellCooldownHud {
         modEventBus.addListener(ClientModEvents::onRegisterGuiLayers);
         modEventBus.addListener(ClientModEvents::onRegisterKeyMappings);
 
-        // Mods > Spell Cooldown HUD > Config abre o editor com preview, e nao a tela generica de
-        // config do NeoForge: ajustar posicao e cores numa lista de valores seria as cegas.
+        // Mods > Spell Cooldown HUD > Config opens the editor with preview, not NeoForge's generic
+        // config screen: tuning position and colors from a list of values would be blind.
         container.registerExtensionPoint(IConfigScreenFactory.class,
                 (modContainer, parent) -> new HudEditorScreen(parent));
     }

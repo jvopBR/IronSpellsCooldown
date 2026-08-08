@@ -5,15 +5,15 @@ import com.merlin.spellcooldownhud.config.ContentMode;
 import java.util.List;
 
 /**
- * De onde a HUD tira as magias a mostrar.
+ * Where the HUD gets the spells to show.
  *
- * <p>Existem duas implementacoes: {@link IronSpellsSource}, que le o jogo de verdade, e
- * {@link DemoSource}, que produz cooldowns falsos para o preview do editor. Isolar isso atras de
- * uma interface e o que permite ajustar a HUD sem estar em combate -- e, no futuro, suportar
- * outro mod de magia sem mexer em renderer nenhum.
+ * <p>There are two implementations: {@link IronSpellsSource}, which reads the real game, and
+ * {@link DemoSource}, which produces fake cooldowns for the editor preview. Isolating this behind
+ * an interface is what lets you tune the HUD without being in combat -- and, later, support another
+ * spell mod without touching any renderer.
  */
 public interface CooldownSource {
 
-    /** Entradas do frame atual, sem ordenacao nem corte -- disso cuida o tracker. */
+    /** This frame's entries, unsorted and uncapped -- the tracker handles that. */
     List<CooldownEntry> collect(ContentMode mode);
 }

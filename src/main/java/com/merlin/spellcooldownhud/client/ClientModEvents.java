@@ -6,10 +6,10 @@ import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
 /**
- * Eventos do barramento do mod: registro da camada de HUD e das teclas.
+ * Mod-bus events: registration of the HUD layer and the key mappings.
  *
- * <p>Sao ligados a mao no construtor de {@link SpellCooldownHud} em vez de por
- * {@code @EventBusSubscriber(bus = MOD)}, que esta deprecado para remocao no NeoForge 21.1.
+ * <p>Wired up by hand in {@link SpellCooldownHud}'s constructor instead of via
+ * {@code @EventBusSubscriber(bus = MOD)}, which is deprecated for removal in NeoForge 21.1.
  */
 public final class ClientModEvents {
 
@@ -17,7 +17,7 @@ public final class ClientModEvents {
     }
 
     public static void onRegisterGuiLayers(RegisterGuiLayersEvent event) {
-        // Acima da hotbar e abaixo do chat: a HUD nao cobre a conversa nem some atras dos itens.
+        // Above the hotbar and below the chat: the HUD covers neither the conversation nor the items.
         event.registerAbove(
                 VanillaGuiLayers.HOTBAR,
                 SpellCooldownHud.id("spell_cooldowns"),

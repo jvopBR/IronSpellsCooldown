@@ -13,10 +13,10 @@ import net.minecraft.util.Mth;
 import java.util.List;
 
 /**
- * A camada de HUD propriamente dita, registrada logo acima da hotbar.
+ * The HUD layer itself, registered just above the hotbar.
  *
- * <p>O desenho vive num metodo estatico para o editor poder reaproveita-lo no preview: ajustar a
- * HUD numa tela que desenha algo diferente do jogo seria inutil.
+ * <p>The drawing lives in a static method so the editor can reuse it in the preview: tuning the HUD
+ * on a screen that draws something different from the game would be pointless.
  */
 public final class HudLayer implements LayeredDraw.Layer {
 
@@ -39,20 +39,19 @@ public final class HudLayer implements LayeredDraw.Layer {
         if (minecraft.player == null || minecraft.level == null) {
             return false;
         }
-        // O GuiLayerManager achata os grupos vanilla e embrulha CADA camada vanilla no teste de
-        // hideGui -- camadas de mod inseridas entre elas nao herdam esse teste. Sem esta linha a
-        // HUD continuaria aparecendo com o F1 ligado.
+        // The GuiLayerManager flattens the vanilla groups and wraps EACH vanilla layer in the
+        // hideGui check -- mod layers inserted between them don't inherit it. Without this line the
+        // HUD would keep showing with F1 on.
         if (HudConfig.HIDE_IN_F1.get() && minecraft.options.hideGui) {
             return false;
         }
-        // Com o editor ou a tela de mover abertos quem desenha o preview sao eles, para nao
-        // sair em dobro.
+        // With the editor or the move screen open, they draw the preview, so we don't draw it twice.
         return !(minecraft.screen instanceof HudPreviewScreen);
     }
 
     /**
-     * Desenha a HUD e devolve o layout usado, que o editor aproveita para saber onde esta o
-     * retangulo de arrasto.
+     * Draws the HUD and returns the layout used, which the editor reuses to know where the drag
+     * rectangle is.
      */
     public static HudLayout draw(GuiGraphics graphics, CooldownTracker tracker, ContentMode mode) {
         List<CooldownTracker.TrackedEntry> entries = tracker.snapshot(
@@ -63,8 +62,8 @@ public final class HudLayer implements LayeredDraw.Layer {
         int cellWidth = renderer.cellWidth(iconSize, entries);
         int cellHeight = renderer.cellHeight(iconSize);
 
-        // A escala do mod multiplica a escala de GUI do jogo. Calculamos a ancoragem no espaco
-        // JA escalado, senao uma HUD ancorada a direita sairia da tela ao aumentar a escala.
+        // The mod's scale multiplies the game's GUI scale. We compute the anchoring in the ALREADY
+        // scaled space, otherwise a right-anchored HUD would fall off-screen as the scale grows.
         float scale = HudConfig.SCALE.get().floatValue();
         int screenWidth = Mth.floor(graphics.guiWidth() / scale);
         int screenHeight = Mth.floor(graphics.guiHeight() / scale);

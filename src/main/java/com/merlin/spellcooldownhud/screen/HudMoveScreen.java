@@ -11,14 +11,14 @@ import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 /**
- * Tela transparente para arrastar a HUD com o mouse.
+ * Transparent screen for dragging the HUD with the mouse.
  *
- * <p>Sem painel de controles de proposito: no editor, o painel da esquerda ocupa 192px e bloqueia
- * cliques, o que tornava impossivel posicionar a HUD naquele lado da tela. Aqui a tela inteira e
- * area de arrasto.
+ * <p>No control panel on purpose: in the editor, the left panel takes 192px and blocks clicks,
+ * which made it impossible to position the HUD on that side of the screen. Here the whole screen is
+ * a drag area.
  *
- * <p>As nove ancoras aparecem como marcas discretas, com a ativa destacada, para ficar visivel a
- * que canto a HUD vai se prender -- e portanto como ela vai se comportar em outra resolucao.
+ * <p>The nine anchors show as discreet marks, with the active one highlighted, so it's visible
+ * which corner the HUD will stick to -- and therefore how it will behave at another resolution.
  */
 public final class HudMoveScreen extends Screen implements HudPreviewScreen {
 
@@ -39,7 +39,7 @@ public final class HudMoveScreen extends Screen implements HudPreviewScreen {
         this.parent = parent;
     }
 
-    /** O jogo segue rodando atras: posicionar a HUD sem ver o jogo seria posicionar as cegas. */
+    /** The game keeps running behind: positioning the HUD without seeing the game would be blind. */
     @Override
     public boolean isPauseScreen() {
         return false;
@@ -61,11 +61,11 @@ public final class HudMoveScreen extends Screen implements HudPreviewScreen {
     }
 
     /**
-     * Vazio de proposito: esta tela e totalmente transparente.
+     * Empty on purpose: this screen is fully transparent.
      *
-     * <p>{@code Screen.render} chama {@code renderBackground} antes dos widgets, e o padrao aplica
-     * o blur do vanilla mais o fundo de menu -- por cima do preview da HUD, ja que o preview e
-     * desenhado antes. Sem neutralizar isto, a tela sai escura e borrada.
+     * <p>{@code Screen.render} calls {@code renderBackground} before the widgets, and the default
+     * applies the vanilla blur plus the menu background -- on top of the HUD preview, since the
+     * preview is drawn first. Without neutralizing this, the screen comes out dark and blurred.
      */
     @Override
     public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
@@ -74,8 +74,8 @@ public final class HudMoveScreen extends Screen implements HudPreviewScreen {
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        // Fora de um mundo nao ha nada para ver atraves, entao o fundo padrao e melhor que vazio.
-        // Desenhado aqui, e nao no renderBackground, para ficar ANTES do preview em vez de cobri-lo.
+        // Outside a world there's nothing to see through, so the default background beats empty.
+        // Drawn here, not in renderBackground, so it comes BEFORE the preview instead of covering it.
         if (minecraft != null && minecraft.level == null) {
             super.renderBackground(graphics, mouseX, mouseY, partialTick);
         }
@@ -84,7 +84,7 @@ public final class HudMoveScreen extends Screen implements HudPreviewScreen {
         drag.drawPreview(graphics);
         drag.drawOutline(graphics);
 
-        // Desenha os botoes; o renderBackground acima ja e o no-op transparente.
+        // Draws the buttons; the renderBackground above is already the transparent no-op.
         super.render(graphics, mouseX, mouseY, partialTick);
 
         drawHint(graphics);
@@ -127,7 +127,7 @@ public final class HudMoveScreen extends Screen implements HudPreviewScreen {
         if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT) {
             return false;
         }
-        // minX = 0: a tela inteira e agarravel, inclusive a borda esquerda.
+        // minX = 0: the whole screen is grabbable, including the left edge.
         return drag.beginDrag(mouseX, mouseY, 0);
     }
 

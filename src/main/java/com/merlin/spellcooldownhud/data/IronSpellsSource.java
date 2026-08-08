@@ -22,18 +22,18 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A UNICA classe do mod que fala com a API do Iron's Spells 'n Spellbooks.
+ * The ONLY class in the mod that talks to the Iron's Spells 'n Spellbooks API.
  *
- * <p>Todo o resto trabalha com {@link CooldownEntry}, que so usa tipos do Minecraft. Manter esta
- * fronteira num arquivo so significa que uma mudanca de API do Iron's Spells quebra a compilacao
- * aqui e em nenhum outro lugar.
+ * <p>Everything else works with {@link CooldownEntry}, which uses only Minecraft types. Keeping
+ * this boundary in a single file means an Iron's Spells API change breaks compilation here and
+ * nowhere else.
  *
- * <p>Nao ha rede envolvida: o Iron's Spells ja sincroniza os cooldowns para o cliente e os expoe
- * via {@link ClientMagicData}. Este mod so le esse estado.
+ * <p>No networking involved: Iron's Spells already syncs the cooldowns to the client and exposes
+ * them via {@link ClientMagicData}. This mod only reads that state.
  */
 public final class IronSpellsSource implements CooldownSource {
 
-    /** Usada quando a magia nao tem escola (ex. magias de addon sem escola declarada). */
+    /** Used when the spell has no school (e.g. addon spells with no declared school). */
     private static final int DEFAULT_SCHOOL_COLOR = 0xB0B0C0;
 
     @Override
@@ -56,8 +56,8 @@ public final class IronSpellsSource implements CooldownSource {
     }
 
     /**
-     * Le direto o mapa de cooldowns. Pega qualquer magia em cooldown, inclusive as lancadas por
-     * pergaminho ou item que nao estao equipadas no momento.
+     * Reads the cooldown map directly. Picks up any spell on cooldown, including ones cast from a
+     * scroll or item that aren't currently equipped.
      */
     private static List<CooldownEntry> fromActiveCooldowns(LocalPlayer player,
                                                            Map<String, CooldownInstance> active) {
@@ -65,8 +65,8 @@ public final class IronSpellsSource implements CooldownSource {
             return List.of();
         }
 
-        // O mapa de cooldowns guarda so o id, sem o nivel. Buscamos o nivel nas magias equipadas
-        // para o badge ficar correto; quando a magia nao estiver equipada, fica 0 (nao desenhado).
+        // The cooldown map holds only the id, not the level. We look the level up in the equipped
+        // spells so the badge is correct; when the spell isn't equipped it stays 0 (not drawn).
         Map<String, Integer> levels = equippedLevels();
 
         List<CooldownEntry> entries = new ArrayList<>(active.size());
@@ -87,7 +87,7 @@ public final class IronSpellsSource implements CooldownSource {
         return entries;
     }
 
-    /** Percorre as magias equipadas e casa cada uma com seu cooldown, se houver. */
+    /** Walks the equipped spells and matches each with its cooldown, if any. */
     private static List<CooldownEntry> fromEquippedSpells(LocalPlayer player,
                                                           Map<String, CooldownInstance> active) {
         SpellSelectionManager manager = ClientMagicData.getSpellSelectionManager();
@@ -110,7 +110,7 @@ public final class IronSpellsSource implements CooldownSource {
 
             CooldownInstance cooldown = active.get(spell.getSpellId());
             int remaining = cooldown == null ? 0 : cooldown.getCooldownRemaining();
-            // Sem cooldown ativo nao ha duracao gravada; usamos a da magia para a fracao fazer sentido.
+            // With no active cooldown there's no recorded duration; use the spell's so the fraction makes sense.
             int total = cooldown == null ? spell.getSpellCooldown() : cooldown.getSpellCooldown();
 
             entries.add(toEntry(player, spell, data.getLevel(), remaining, total, option.globalIndex));
@@ -147,7 +147,7 @@ public final class IronSpellsSource implements CooldownSource {
             if (spell == null || isNone(spell)) {
                 continue;
             }
-            // A mesma magia pode estar em dois slots com niveis diferentes; o maior manda.
+            // The same spell can be in two slots at different levels; the higher one wins.
             levels.merge(spell.getSpellId(), data.getLevel(), Math::max);
         }
         return levels;
@@ -163,9 +163,8 @@ public final class IronSpellsSource implements CooldownSource {
     }
 
     /**
-     * Ja vem no caminho completo ({@code <namespace>:textures/gui/spell_icons/<nome>.png}), inclusive
-     * para magias de addon -- e por isso que as magias customizadas do servidor funcionam sem
-     * nenhum tratamento especial.
+     * Comes back as a full path ({@code <namespace>:textures/gui/spell_icons/<name>.png}), including
+     * for addon spells -- which is why the server's custom spells work with no special handling.
      */
     private static ResourceLocation iconOf(AbstractSpell spell) {
         try {
@@ -176,15 +175,15 @@ public final class IronSpellsSource implements CooldownSource {
     }
 
     /**
-     * O parametro Player existe porque algumas magias variam o nome conforme quem olha. Fora do
-     * mundo (preview aberto pelo menu de mods) nao ha player, entao caimos no id da magia.
+     * The Player parameter exists because some spells vary their name by who's looking. Outside a
+     * world (preview opened from the mods menu) there's no player, so we fall back to the spell id.
      */
     private static Component displayNameOf(AbstractSpell spell, LocalPlayer player) {
         if (player != null) {
             try {
                 return spell.getDisplayName(player);
             } catch (RuntimeException ignored) {
-                // cai no fallback abaixo
+                // falls through to the fallback below
             }
         }
         String id = spell.getSpellId();
@@ -214,11 +213,11 @@ public final class IronSpellsSource implements CooldownSource {
     }
 
     /**
-     * Magias reais do registry com tempos ficticios, para o preview do editor.
+     * Real registry spells with fictitious times, for the editor preview.
      *
-     * <p>Fica aqui, e nao no {@link DemoSource}, para nao furar a regra de que so esta classe
-     * importa {@code io.redspace}. O preview usa icones de verdade, entao o que voce ajusta e
-     * exatamente o que vai ver em jogo.
+     * <p>It lives here, not in {@link DemoSource}, so as not to break the rule that only this class
+     * imports {@code io.redspace}. The preview uses real icons, so what you tune is exactly what
+     * you'll see in game.
      */
     public static List<CooldownEntry> previewSamples(int count) {
         List<AbstractSpell> spells;
@@ -239,7 +238,7 @@ public final class IronSpellsSource implements CooldownSource {
             if (spell == null || isNone(spell)) {
                 continue;
             }
-            // Cooldowns escalonados para o preview mostrar varios estagios de varredura de uma vez.
+            // Staggered cooldowns so the preview shows several sweep stages at once.
             int total = 200 + i * 40;
             int remaining = (int) (total * (1.0f - (i / (float) Math.max(1, count))));
             samples.add(toEntry(player, spell, 1 + (i % 5), remaining, total, i));
