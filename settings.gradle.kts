@@ -12,7 +12,11 @@ plugins {
 
 stonecutter {
     create(rootProject) {
+        // NeoForge (moddev moderno): id == versao do MC. Loaders legado (Forge / NeoForge 1.20.1):
+        // id com sufixo do loader, pra distinguir dois loaders na mesma versao do MC.
         versions("1.21.1", "1.21")
+        version("1.20.1-forge", "1.20.1")
+        version("1.20.1-neoforge", "1.20.1")
         vcsVersion = "1.21.1"
     }
 }

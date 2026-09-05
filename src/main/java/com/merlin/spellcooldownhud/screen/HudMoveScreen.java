@@ -68,7 +68,11 @@ public final class HudMoveScreen extends Screen implements HudPreviewScreen {
      * preview is drawn first. Without neutralizing this, the screen comes out dark and blurred.
      */
     @Override
+    //? if >=1.21 {
     public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    //?} else {
+    /*public void renderBackground(GuiGraphics graphics) {
+    *///?}
         // no-op
     }
 
@@ -77,7 +81,11 @@ public final class HudMoveScreen extends Screen implements HudPreviewScreen {
         // Outside a world there's nothing to see through, so the default background beats empty.
         // Drawn here, not in renderBackground, so it comes BEFORE the preview instead of covering it.
         if (minecraft != null && minecraft.level == null) {
+            //? if >=1.21 {
             super.renderBackground(graphics, mouseX, mouseY, partialTick);
+            //?} else {
+            /*super.renderBackground(graphics);
+            *///?}
         }
 
         drawAnchorGuides(graphics);

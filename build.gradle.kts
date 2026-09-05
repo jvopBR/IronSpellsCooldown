@@ -1,9 +1,16 @@
+import net.neoforged.moddevgradle.dsl.ModDevExtension
+import net.neoforged.moddevgradle.dsl.NeoForgeExtension
+import net.neoforged.moddevgradle.legacyforge.dsl.LegacyForgeExtension
 import org.gradle.language.jvm.tasks.ProcessResources
 
 plugins {
     `java-library`
     `maven-publish`
-    id("net.neoforged.moddev") version "2.0.142"
+    // Both ModDevGradle variants ship in the same artifact and are declared apply-false: they land
+    // on every node's classpath, but exactly one is applied per node depending on its loader (see
+    // below). moddev = modern NeoForge (>=1.20.2); legacyforge = MinecraftForge + NeoForge 1.20.1.
+    id("net.neoforged.moddev") version "2.0.142" apply false
+    id("net.neoforged.moddev.legacyforge") version "2.0.142" apply false
     idea
 }
 
@@ -20,22 +27,76 @@ val loader_version_range: String by project
 // gradle.properties because they differ between 1.21 and 1.21.1.
 val minecraft_version = stonecutter.current.version
 
-// [neo_version, neo_version_range, parchment_minecraft_version, parchment_mappings_version, minecraft_version_range]
-val mcSpec = when (minecraft_version) {
-    "1.21.1" -> listOf("21.1.241", "[21.1.0,)", "1.21.1", "2024.11.17", "[1.21.1]")
-    "1.21"   -> listOf("21.0.167", "[21.0.0,)", "1.21",   "2024.07.28", "[1.21]")
-    else -> error("Unmapped Minecraft version: $minecraft_version")
+// Loader is read from the node-id suffix (e.g. "1.20.1-forge"). Bare nodes ("1.21.1", "1.21") are
+// modern NeoForge. Modern moddev only supports NeoForge >=1.20.2, so all Forge and NeoForge 1.20.1
+// go through the legacyforge plugin instead.
+val nodeId = stonecutter.current.project
+val loader = when {
+    nodeId.endsWith("-forge") -> "forge"
+    nodeId.endsWith("-neoforge") -> "neoforge"
+    else -> "neoforge"
 }
-val neo_version = mcSpec[0]
-val neo_version_range = mcSpec[1]
-val parchment_minecraft_version = mcSpec[2]
-val parchment_mappings_version = mcSpec[3]
-val minecraft_version_range = mcSpec[4]
-val irons_spellbooks_version: String by project
-val irons_lib_version: String by project
+val useLegacyPlugin = loader == "forge" || minecraft_version == "1.20.1"
+
+// Per-node build metadata, keyed on the node id (which carries the loader) so the two loaders at
+// MC 1.20.1 can differ. loaderVersion = NeoForge or Forge coordinate; ironsSpellbooks/ironsLib =
+// the compileOnly deps (Modrinth). Dev-only libs (geckolib/curios/...) stay in gradle.properties.
+val nodeSpec: Map<String, String> = when (nodeId) {
+    "1.21.1" -> mapOf(
+        "loaderVersion" to "21.1.241", "loaderRange" to "[21.1.0,)",
+        "parchmentMc" to "1.21.1", "parchmentMappings" to "2024.11.17",
+        "mcRange" to "[1.21.1]",
+        "ironsSpellbooks" to "1.21.1-3.16.2", "ironsLib" to "1.21.1-2.1.0",
+    )
+    "1.21" -> mapOf(
+        "loaderVersion" to "21.0.167", "loaderRange" to "[21.0.0,)",
+        "parchmentMc" to "1.21", "parchmentMappings" to "2024.07.28",
+        "mcRange" to "[1.21]",
+        "ironsSpellbooks" to "1.21.1-3.16.2", "ironsLib" to "1.21.1-2.1.0",
+    )
+    "1.20.1-forge" -> mapOf(
+        "loaderVersion" to "1.20.1-47.3.0", "loaderRange" to "[47,)",
+        "parchmentMc" to "1.20.1", "parchmentMappings" to "2023.09.03",
+        "mcRange" to "[1.20.1]",
+        "ironsSpellbooks" to "1.20.1-3.16.2", "ironsLib" to "1.20.1-2.1.0",
+    )
+    // NeoForge 1.20.1 (47.x) is a soft-fork of Forge 47.x under the same net.minecraftforge API, so
+    // the source is shared with the Forge node via `//? if <1.21`. Iron's Spells is frozen at 3.4.0
+    // here; that version predates the irons-lib split, so there is no irons-lib dependency.
+    "1.20.1-neoforge" -> mapOf(
+        "loaderVersion" to "1.20.1-47.1.106", "loaderRange" to "[47,)",
+        "parchmentMc" to "1.20.1", "parchmentMappings" to "2023.09.03",
+        "mcRange" to "[1.20.1]",
+        "ironsSpellbooks" to "1.20.1-3.4.0",
+    )
+    else -> error("Unmapped node: $nodeId")
+}
+val neo_version = nodeSpec.getValue("loaderVersion")
+val neo_version_range = nodeSpec.getValue("loaderRange")
+val parchment_minecraft_version = nodeSpec.getValue("parchmentMc")
+val parchment_mappings_version = nodeSpec.getValue("parchmentMappings")
+val minecraft_version_range = nodeSpec.getValue("mcRange")
+val irons_spellbooks_version = nodeSpec.getValue("ironsSpellbooks")
+// Nullable: NeoForge 1.20.1 (Iron's Spells 3.4.0) predates the irons-lib split, so it has none.
+val irons_lib_version = nodeSpec["ironsLib"]
 val geckolib_version: String by project
 val player_animation_version: String by project
 val curios_version: String by project
+
+// Resource-pack format for pack.mcmeta, by MC version (1.20.1 = 15, 1.21 / 1.21.1 = 34). Without a
+// pack.mcmeta, Forge 1.20.1 warns "failed to load a valid ResourcePackInfo" and skips the assets.
+val pack_format = when (minecraft_version) {
+    "1.21.1", "1.21" -> "34"
+    "1.20.1" -> "15"
+    else -> error("No pack_format mapped for Minecraft $minecraft_version")
+}
+
+// Apply only this node's loader plugin (both entered the classpath as apply-false above).
+if (useLegacyPlugin) {
+    apply(plugin = "net.neoforged.moddev.legacyforge")
+} else {
+    apply(plugin = "net.neoforged.moddev")
+}
 
 version = mod_version
 group = mod_group_id
@@ -47,9 +108,9 @@ val instanceModsDir = findProperty("instance_mods_dir")
 // Jars usados SO pelo dev client (runClient). Ausentes (CI), o build segue: a compilacao usa o
 // Modrinth, so a execucao precisa deles. rootProject.file porque com Stonecutter este build roda
 // no contexto de cada versao (versions/<v>/); sem Stonecutter, rootProject == project.
-val devRuntimeJars = listOf(
+val devRuntimeJars = listOfNotNull(
     "libs/irons_spellbooks-$irons_spellbooks_version.jar",
-    "libs/irons_lib-$irons_lib_version.jar",
+    irons_lib_version?.let { "libs/irons_lib-$it.jar" },
     "libs/geckolib-neoforge-$geckolib_version.jar",
     "libs/player-animation-lib-forge-$player_animation_version.jar",
     "libs/curios-neoforge-$curios_version.jar",
@@ -78,19 +139,42 @@ repositories {
 }
 
 base {
-    archivesName.set(mod_id)
+    // Include the MC version and loader so every node produces a distinct, self-describing jar
+    // (e.g. spellcooldownhud-1.20.1-forge-0.1.1.jar) -- needed since two loaders share MC 1.20.1,
+    // and so all versions can sit side by side when testing or uploading to CurseForge.
+    archivesName.set("$mod_id-$minecraft_version-$loader")
 }
 
 java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
+    // Modern NeoForge (1.21.x) runs on Java 21; Forge / NeoForge 1.20.1 (legacy) on Java 17.
+    toolchain.languageVersion.set(JavaLanguageVersion.of(if (useLegacyPlugin) 17 else 21))
 }
 
-neoForge {
-    version = neo_version
+// Version-specific: only the concrete plugin extension knows `version`. Forge and NeoForge 1.20.1
+// (both legacy) use different Maven coordinates, so they set it differently.
+if (useLegacyPlugin) {
+    configure<LegacyForgeExtension> {
+        if (loader == "forge") {
+            version = neo_version                 // net.minecraftforge:forge (e.g. 1.20.1-47.3.0)
+        } else {
+            enable { neoForgeVersion = neo_version } // net.neoforged:forge (e.g. 1.20.1-47.1.106)
+        }
+    }
+} else {
+    configure<NeoForgeExtension> {
+        version = neo_version
+    }
+}
 
-    parchment {
-        mappingsVersion = parchment_mappings_version
-        minecraftVersion = parchment_minecraft_version
+// Shared config, written once against the base type common to both plugins (ModDevExtension).
+configure<ModDevExtension> {
+    // Parchment (nicer param names in dev) only on the modern path for now; the legacy plugin uses
+    // MCP mappings and we don't want to entangle the two before it's verified. Dev-only anyway.
+    if (!useLegacyPlugin) {
+        parchment {
+            mappingsVersion = parchment_mappings_version
+            minecraftVersion = parchment_minecraft_version
+        }
     }
 
     // AT do Iron's Spells: sem isso o mod quebra com IllegalAccessError no boot do dev client.
@@ -116,6 +200,11 @@ neoForge {
     }
 }
 
+// Expose the loader to Stonecutter source preprocessing (`//? if forge { ... }`); the MC version
+// alone can't tell the loaders apart on 1.20.1.
+stonecutter.constants["forge"] = loader == "forge"
+stonecutter.constants["neoforge"] = loader == "neoforge"
+
 // Configuration 'localRuntime': dependencias presentes no runtime de teste mas nao publicadas.
 val localRuntime by configurations.creating
 configurations.named("runtimeClasspath") {
@@ -125,7 +214,9 @@ configurations.named("runtimeClasspath") {
 dependencies {
     // A API que este mod le. compileOnly porque nao republicamos a dependencia.
     compileOnly("maven.modrinth:irons-spells-n-spellbooks:$irons_spellbooks_version")
-    compileOnly("maven.modrinth:irons-lib:$irons_lib_version")
+    // irons-lib nao existe para o Iron's Spells 3.4.0 (NeoForge 1.20.1); o codigo nao importa
+    // io.redspace.ironslib, entao e so pular quando o no nao tem versao de lib.
+    irons_lib_version?.let { compileOnly("maven.modrinth:irons-lib:$it") }
 
     // As 5 dependencias do Iron's Spells, so para o runClient. Sem libs/ (CI), sao puladas.
     if (devClientReady) {
@@ -165,14 +256,25 @@ val generateModMetadata by tasks.registering(ProcessResources::class) {
         "mod_name" to mod_name,
         "mod_license" to mod_license,
         "mod_version" to mod_version,
+        "pack_format" to pack_format,
     )
     inputs.properties(replaceProperties)
     expand(replaceProperties)
-    from(rootProject.file("src/main/templates"))
+    // Modern NeoForge reads META-INF/neoforge.mods.toml; the legacy loaders (Forge and NeoForge
+    // 1.20.1) read META-INF/mods.toml and differ only in the loader dependency modid (forge vs
+    // neoforge), so each of the three has its own template dir.
+    val templateDir = when {
+        !useLegacyPlugin -> "src/main/templates"
+        loader == "forge" -> "src/main/templates-forge"
+        else -> "src/main/templates-neoforge-legacy"
+    }
+    from(rootProject.file(templateDir))
+    // pack.mcmeta goes to the jar root for every loader (only pack_format differs, by MC version).
+    from(rootProject.file("src/main/templates-shared"))
     into(layout.buildDirectory.dir("generated/sources/modMetadata"))
 }
 sourceSets["main"].resources.srcDir(generateModMetadata)
-neoForge.ideSyncTask(generateModMetadata)
+the<ModDevExtension>().ideSyncTask(generateModMetadata)
 
 publishing {
     publications {

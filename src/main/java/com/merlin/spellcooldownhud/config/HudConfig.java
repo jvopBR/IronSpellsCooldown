@@ -1,44 +1,58 @@
 package com.merlin.spellcooldownhud.config;
 
-import net.neoforged.neoforge.common.ModConfigSpec;
+// Inner spec types by simple name so the field declarations stay loader-agnostic (ForgeConfigSpec
+// exposes the same inner types). Only these imports and the SPEC field type are gated by loader.
+//? if <1.21 {
+/*import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
+import net.minecraftforge.common.ForgeConfigSpec.Builder;
+import net.minecraftforge.common.ForgeConfigSpec.DoubleValue;
+import net.minecraftforge.common.ForgeConfigSpec.EnumValue;
+import net.minecraftforge.common.ForgeConfigSpec.IntValue;
+*///?} else {
+import net.neoforged.neoforge.common.ModConfigSpec.BooleanValue;
+import net.neoforged.neoforge.common.ModConfigSpec.Builder;
+import net.neoforged.neoforge.common.ModConfigSpec.DoubleValue;
+import net.neoforged.neoforge.common.ModConfigSpec.EnumValue;
+import net.neoforged.neoforge.common.ModConfigSpec.IntValue;
+//?}
 
 /**
  * The mod's client config, written to {@code config/spellcooldownhud-client.toml}.
  *
- * <p>Every value is read directly during render. That's cheap because
- * {@link ModConfigSpec.ConfigValue#get()} caches the value and only invalidates it on reload;
- * colors, which would need parsing, go through {@link CachedColor}.
+ * <p>Every value is read directly during render. That's cheap because {@code ConfigValue.get()}
+ * caches the value and only invalidates it on reload; colors, which would need parsing, go through
+ * {@link CachedColor}.
  */
 public final class HudConfig {
-    private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
+    private static final Builder BUILDER = new Builder();
 
     // ---------------------------------------------------------------- conteudo
-    public static final ModConfigSpec.EnumValue<ContentMode> CONTENT_MODE;
-    public static final ModConfigSpec.EnumValue<SortMode> SORT_MODE;
-    public static final ModConfigSpec.IntValue MAX_ENTRIES;
-    public static final ModConfigSpec.BooleanValue HIDE_IN_F1;
-    public static final ModConfigSpec.BooleanValue USE_SERVER_TIME;
+    public static final EnumValue<ContentMode> CONTENT_MODE;
+    public static final EnumValue<SortMode> SORT_MODE;
+    public static final IntValue MAX_ENTRIES;
+    public static final BooleanValue HIDE_IN_F1;
+    public static final BooleanValue USE_SERVER_TIME;
 
     // ------------------------------------------------------------------ layout
-    public static final ModConfigSpec.EnumValue<Anchor> ANCHOR;
-    public static final ModConfigSpec.IntValue OFFSET_X;
-    public static final ModConfigSpec.IntValue OFFSET_Y;
-    public static final ModConfigSpec.EnumValue<GrowDirection> GROW_DIRECTION;
-    public static final ModConfigSpec.IntValue ICON_SIZE;
-    public static final ModConfigSpec.IntValue SPACING;
-    public static final ModConfigSpec.IntValue MAX_PER_LINE;
+    public static final EnumValue<Anchor> ANCHOR;
+    public static final IntValue OFFSET_X;
+    public static final IntValue OFFSET_Y;
+    public static final EnumValue<GrowDirection> GROW_DIRECTION;
+    public static final IntValue ICON_SIZE;
+    public static final IntValue SPACING;
+    public static final IntValue MAX_PER_LINE;
 
     // ------------------------------------------------------------------ estilo
-    public static final ModConfigSpec.EnumValue<HudStyle> STYLE;
-    public static final ModConfigSpec.BooleanValue SHOW_ICON;
-    public static final ModConfigSpec.BooleanValue SHOW_NAME;
-    public static final ModConfigSpec.BooleanValue SHOW_TIMER;
-    public static final ModConfigSpec.EnumValue<TimerFormat> TIMER_FORMAT;
-    public static final ModConfigSpec.BooleanValue SHOW_LEVEL;
-    public static final ModConfigSpec.BooleanValue DRAW_BORDER;
+    public static final EnumValue<HudStyle> STYLE;
+    public static final BooleanValue SHOW_ICON;
+    public static final BooleanValue SHOW_NAME;
+    public static final BooleanValue SHOW_TIMER;
+    public static final EnumValue<TimerFormat> TIMER_FORMAT;
+    public static final BooleanValue SHOW_LEVEL;
+    public static final BooleanValue DRAW_BORDER;
 
     // ------------------------------------------------------------------- cores
-    public static final ModConfigSpec.BooleanValue USE_SCHOOL_COLOR;
+    public static final BooleanValue USE_SCHOOL_COLOR;
     public static final CachedColor BACKGROUND_COLOR;
     public static final CachedColor SWEEP_COLOR;
     public static final CachedColor BORDER_COLOR;
@@ -46,14 +60,18 @@ public final class HudConfig {
     public static final CachedColor READY_FLASH_COLOR;
 
     // ------------------------------------------------------------------ efeitos
-    public static final ModConfigSpec.DoubleValue OPACITY;
-    public static final ModConfigSpec.DoubleValue SCALE;
-    public static final ModConfigSpec.IntValue FADE_IN_TICKS;
-    public static final ModConfigSpec.IntValue FADE_OUT_TICKS;
-    public static final ModConfigSpec.BooleanValue FLASH_WHEN_READY;
-    public static final ModConfigSpec.BooleanValue DIM_WHEN_READY;
+    public static final DoubleValue OPACITY;
+    public static final DoubleValue SCALE;
+    public static final IntValue FADE_IN_TICKS;
+    public static final IntValue FADE_OUT_TICKS;
+    public static final BooleanValue FLASH_WHEN_READY;
+    public static final BooleanValue DIM_WHEN_READY;
 
-    public static final ModConfigSpec SPEC;
+    //? if <1.21 {
+    /*public static final net.minecraftforge.common.ForgeConfigSpec SPEC;
+    *///?} else {
+    public static final net.neoforged.neoforge.common.ModConfigSpec SPEC;
+    //?}
 
     static {
         BUILDER.comment("What shows up on the HUD").push("content");

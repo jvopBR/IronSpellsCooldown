@@ -134,10 +134,15 @@ public final class RenderSupport {
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
 
         Matrix4f matrix = graphics.pose().last().pose();
+        //? if >=1.21 {
         BufferBuilder buffer = Tesselator.getInstance()
                 .begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
+        //?} else {
+        /*BufferBuilder buffer = Tesselator.getInstance().getBuilder();
+        buffer.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
+        *///?}
 
-        buffer.addVertex(matrix, centerX, centerY, 0.0f).setColor(argb);
+        sweepVertex(buffer, matrix, centerX, centerY, argb);
 
         int segments = Math.max(2, Mth.ceil(SWEEP_SEGMENTS * clamped));
         float sweep = clamped * TWO_PI;
@@ -149,11 +154,28 @@ public final class RenderSupport {
             float dy = -Mth.cos(angle);
             // Projection onto the square's edge: on the larger axis, the reach is exactly half a side.
             float reach = half / Math.max(Math.abs(dx), Math.abs(dy));
-            buffer.addVertex(matrix, centerX + dx * reach, centerY + dy * reach, 0.0f).setColor(argb);
+            sweepVertex(buffer, matrix, centerX + dx * reach, centerY + dy * reach, argb);
         }
 
+        //? if >=1.21 {
         BufferUploader.drawWithShader(buffer.buildOrThrow());
+        //?} else {
+        /*BufferUploader.drawWithShader(buffer.end());
+        *///?}
         RenderSystem.disableBlend();
+    }
+
+    // The immediate-mode vertex call differs between 1.20.1 and 1.21; isolated here so the sweep
+    // geometry above stays version-agnostic. 1.21 packs the color into one int (setColor); 1.20.1
+    // takes four components on a float/int vertex builder and needs an explicit endVertex().
+    private static void sweepVertex(BufferBuilder buffer, Matrix4f matrix, float x, float y, int argb) {
+        //? if >=1.21 {
+        buffer.addVertex(matrix, x, y, 0.0f).setColor(argb);
+        //?} else {
+        /*buffer.vertex(matrix, x, y, 0.0f)
+                .color((argb >> 16) & 0xFF, (argb >> 8) & 0xFF, argb & 0xFF, (argb >>> 24) & 0xFF)
+                .endVertex();
+        *///?}
     }
 
     /** White flash that covers the entry the instant the spell becomes ready. */

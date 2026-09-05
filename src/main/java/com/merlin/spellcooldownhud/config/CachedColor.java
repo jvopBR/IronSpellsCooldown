@@ -1,6 +1,12 @@
 package com.merlin.spellcooldownhud.config;
 
-import net.neoforged.neoforge.common.ModConfigSpec;
+// ForgeConfigSpec and ModConfigSpec share the same inner types; importing ConfigValue by simple
+// name keeps the code below loader-agnostic -- only this import is gated.
+//? if <1.21 {
+/*import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
+*///?} else {
+import net.neoforged.neoforge.common.ModConfigSpec.ConfigValue;
+//?}
 
 import java.util.Locale;
 
@@ -12,20 +18,20 @@ import java.util.Locale;
  * follow config reloads and edits made in the editor without any manual invalidation.
  */
 public final class CachedColor {
-    private final ModConfigSpec.ConfigValue<String> value;
+    private final ConfigValue<String> value;
     private final int fallback;
 
     private String lastRaw;
     private int cached;
 
-    CachedColor(ModConfigSpec.ConfigValue<String> value, int fallback) {
+    CachedColor(ConfigValue<String> value, int fallback) {
         this.value = value;
         this.fallback = fallback;
         this.cached = fallback;
     }
 
     /** The raw value, for the editor to write to. */
-    public ModConfigSpec.ConfigValue<String> raw() {
+    public ConfigValue<String> raw() {
         return value;
     }
 
