@@ -4,11 +4,17 @@ import com.merlin.spellcooldownhud.client.render.CooldownRenderer;
 import com.merlin.spellcooldownhud.config.ContentMode;
 import com.merlin.spellcooldownhud.config.HudConfig;
 import com.merlin.spellcooldownhud.screen.HudPreviewScreen;
-import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.LayeredDraw;
 import net.minecraft.util.Mth;
+// 1.21 registers the HUD as a vanilla LayeredDraw.Layer; Forge 1.20.1 as an IGuiOverlay.
+//? if <1.21 {
+/*import net.minecraftforge.client.gui.overlay.ForgeGui;
+import net.minecraftforge.client.gui.overlay.IGuiOverlay;
+*///?} else {
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.gui.LayeredDraw;
+//?}
 
 import java.util.List;
 
@@ -18,7 +24,11 @@ import java.util.List;
  * <p>The drawing lives in a static method so the editor can reuse it in the preview: tuning the HUD
  * on a screen that draws something different from the game would be pointless.
  */
+//? if <1.21 {
+/*public final class HudLayer implements IGuiOverlay {
+*///?} else {
 public final class HudLayer implements LayeredDraw.Layer {
+//?}
 
     private final CooldownTracker tracker;
 
@@ -27,7 +37,11 @@ public final class HudLayer implements LayeredDraw.Layer {
     }
 
     @Override
+    //? if <1.21 {
+    /*public void render(ForgeGui gui, GuiGraphics graphics, float partialTick, int screenWidth, int screenHeight) {
+    *///?} else {
     public void render(GuiGraphics graphics, DeltaTracker deltaTracker) {
+    //?}
         if (!shouldRender()) {
             return;
         }

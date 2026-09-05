@@ -6,13 +6,24 @@ import com.merlin.spellcooldownhud.data.IronSpellsSource;
 import com.merlin.spellcooldownhud.data.ServerSyncedSource;
 import com.merlin.spellcooldownhud.screen.HudMoveScreen;
 import net.minecraft.client.Minecraft;
+//? if <1.21 {
+/*import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+*///?} else {
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+//?}
 
 /** Game-bus events: refreshes the tracker and listens for the editor key. */
+//? if <1.21 {
+/*@Mod.EventBusSubscriber(modid = SpellCooldownHud.MODID, value = Dist.CLIENT)
+*///?} else {
 @EventBusSubscriber(modid = SpellCooldownHud.MODID, value = Dist.CLIENT)
+//?}
 public final class ClientEvents {
 
     /**
@@ -28,7 +39,15 @@ public final class ClientEvents {
     }
 
     @SubscribeEvent
+    //? if <1.21 {
+    /*static void onClientTick(TickEvent.ClientTickEvent event) {
+        // Forge fires this at both START and END of the tick; NeoForge's .Post is END only.
+        if (event.phase != TickEvent.Phase.END) {
+            return;
+        }
+    *///?} else {
     static void onClientTick(ClientTickEvent.Post event) {
+    //?}
         Minecraft minecraft = Minecraft.getInstance();
 
         if (minecraft.player == null || minecraft.level == null) {

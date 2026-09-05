@@ -17,7 +17,19 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import net.neoforged.neoforge.common.ModConfigSpec;
+//? if <1.21 {
+/*import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
+import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
+import net.minecraftforge.common.ForgeConfigSpec.DoubleValue;
+import net.minecraftforge.common.ForgeConfigSpec.EnumValue;
+import net.minecraftforge.common.ForgeConfigSpec.IntValue;
+*///?} else {
+import net.neoforged.neoforge.common.ModConfigSpec.BooleanValue;
+import net.neoforged.neoforge.common.ModConfigSpec.ConfigValue;
+import net.neoforged.neoforge.common.ModConfigSpec.DoubleValue;
+import net.neoforged.neoforge.common.ModConfigSpec.EnumValue;
+import net.neoforged.neoforge.common.ModConfigSpec.IntValue;
+//?}
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -200,7 +212,7 @@ public final class HudEditorScreen extends Screen implements HudPreviewScreen {
         return widget.getY() + ROW_HEIGHT + ROW_GAP;
     }
 
-    private int addColorRow(int y, String labelKey, ModConfigSpec.ConfigValue<String> value) {
+    private int addColorRow(int y, String labelKey, ConfigValue<String> value) {
         int boxWidth = 78;
         int boxX = MARGIN + contentWidth() - boxWidth;
 
@@ -223,7 +235,7 @@ public final class HudEditorScreen extends Screen implements HudPreviewScreen {
     }
 
     private <E extends Enum<E>> Button enumButton(int y, String labelKey,
-                                                  ModConfigSpec.EnumValue<E> value, E[] options) {
+                                                  EnumValue<E> value, E[] options) {
         return Button.builder(enumLabel(labelKey, value.get()), b -> {
             E next = options[(value.get().ordinal() + 1) % options.length];
             value.set(next);
@@ -232,7 +244,7 @@ public final class HudEditorScreen extends Screen implements HudPreviewScreen {
         }).bounds(MARGIN, y, contentWidth(), ROW_HEIGHT).build();
     }
 
-    private Button toggleButton(int y, String labelKey, ModConfigSpec.BooleanValue value) {
+    private Button toggleButton(int y, String labelKey, BooleanValue value) {
         return Button.builder(boolLabel(labelKey, value.get()), b -> {
             boolean next = !value.get();
             value.set(next);
@@ -242,12 +254,12 @@ public final class HudEditorScreen extends Screen implements HudPreviewScreen {
     }
 
     private final class IntSlider extends AbstractSliderButton {
-        private final ModConfigSpec.IntValue config;
+        private final IntValue config;
         private final String labelKey;
         private final int min;
         private final int max;
 
-        private IntSlider(int y, String labelKey, ModConfigSpec.IntValue config, int min, int max) {
+        private IntSlider(int y, String labelKey, IntValue config, int min, int max) {
             super(MARGIN, y, contentWidth(), ROW_HEIGHT, Component.empty(),
                     (Mth.clamp(config.get(), min, max) - min) / (double) (max - min));
             this.config = config;
@@ -274,12 +286,12 @@ public final class HudEditorScreen extends Screen implements HudPreviewScreen {
     }
 
     private final class DoubleSlider extends AbstractSliderButton {
-        private final ModConfigSpec.DoubleValue config;
+        private final DoubleValue config;
         private final String labelKey;
         private final double min;
         private final double max;
 
-        private DoubleSlider(int y, String labelKey, ModConfigSpec.DoubleValue config,
+        private DoubleSlider(int y, String labelKey, DoubleValue config,
                              double min, double max) {
             super(MARGIN, y, contentWidth(), ROW_HEIGHT, Component.empty(),
                     (Mth.clamp(config.get(), min, max) - min) / (max - min));
@@ -318,7 +330,11 @@ public final class HudEditorScreen extends Screen implements HudPreviewScreen {
      * screen's background is drawn in {@link #render}, in the right order.
      */
     @Override
+    //? if >=1.21 {
     public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    //?} else {
+    /*public void renderBackground(GuiGraphics graphics) {
+    *///?}
         // no-op
     }
 
@@ -327,7 +343,11 @@ public final class HudEditorScreen extends Screen implements HudPreviewScreen {
         // Outside a world there's nothing behind; inside one, just a light veil so the HUD can be
         // positioned relative to what's actually on screen.
         if (minecraft != null && minecraft.level == null) {
+            //? if >=1.21 {
             super.renderBackground(graphics, mouseX, mouseY, partialTick);
+            //?} else {
+            /*super.renderBackground(graphics);
+            *///?}
         } else {
             graphics.fill(0, 0, width, height, 0x55000000);
         }
@@ -461,7 +481,7 @@ public final class HudEditorScreen extends Screen implements HudPreviewScreen {
     // ------------------------------------------------------------------ lifecycle
 
     private void resetAll() {
-        List<ModConfigSpec.ConfigValue<?>> values = List.of(
+        List<ConfigValue<?>> values = List.of(
                 HudConfig.CONTENT_MODE, HudConfig.SORT_MODE, HudConfig.MAX_ENTRIES,
                 HudConfig.HIDE_IN_F1, HudConfig.USE_SERVER_TIME,
                 HudConfig.ANCHOR, HudConfig.OFFSET_X, HudConfig.OFFSET_Y, HudConfig.GROW_DIRECTION,
@@ -475,14 +495,14 @@ public final class HudEditorScreen extends Screen implements HudPreviewScreen {
                 HudConfig.OPACITY, HudConfig.SCALE, HudConfig.FADE_IN_TICKS, HudConfig.FADE_OUT_TICKS,
                 HudConfig.FLASH_WHEN_READY, HudConfig.DIM_WHEN_READY);
 
-        for (ModConfigSpec.ConfigValue<?> value : values) {
+        for (ConfigValue<?> value : values) {
             restoreDefault(value);
         }
         markDirty();
     }
 
     /** Helper just to capture the ConfigValue's type parameter in the set call. */
-    private static <T> void restoreDefault(ModConfigSpec.ConfigValue<T> value) {
+    private static <T> void restoreDefault(ConfigValue<T> value) {
         value.set(value.getDefault());
     }
 

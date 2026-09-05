@@ -3,7 +3,7 @@ Spell Cooldown HUD
 
 **English** · [Português (BR)](README.pt-BR.md)
 
-**Client-side** Minecraft 1.21.1 mod that shows the cooldown of your
+**Client-side** Minecraft mod (1.20.1–1.21.1, Forge & NeoForge) that shows the cooldown of your
 [Iron's Spells 'n Spellbooks](https://www.curseforge.com/minecraft/mc-mods/irons-spells-n-spellbooks)
 spells on a fully configurable HUD — style, position, colors, content and animations.
 
@@ -38,12 +38,17 @@ still needs review by a native speaker; corrections are welcome.
 Requirements
 ------------
 
-| | |
-|---|---|
-| Minecraft | 1.21.1 |
-| NeoForge | 21.1.0 or newer (built against 21.1.241) |
-| Iron's Spells 'n Spellbooks | 1.21.1-3.16.0 or newer |
-| Side | Client only — do **not** install it on the server |
+Pick the download that matches your instance's **Minecraft version and loader**:
+
+| Minecraft | Loader | Iron's Spells 'n Spellbooks |
+|---|---|---|
+| 1.21.1 | NeoForge 21.1.0+ (built against 21.1.241) | 1.21.1-3.16.0+ |
+| 1.21 | NeoForge 21.0.0+ (built against 21.0.167) | 1.21.1-3.16.0+ |
+| 1.20.1 | Forge 47+ | 1.20.1-3.16.0+ |
+| 1.20.1 | NeoForge 47.1+ | 1.20.1-3.4.0+ |
+
+**Client only** — do **not** install it on the server (it registers no network payloads, so it stays
+out of mod negotiation and won't block joining a server that lacks it).
 
 Usage
 -----
@@ -187,17 +192,32 @@ Things learned the hard way, written down so they don't come back:
 Building
 --------
 
-Requires **JDK 21**. To just compile, clone and run `./gradlew build` — the Iron's Spells API is
-resolved from Modrinth (`maven.modrinth:irons-spells-n-spellbooks`), with no manual step.
+The project targets four Minecraft/loader pairs from **one source tree** with
+[Stonecutter](https://stonecutter.kikugie.dev/): NeoForge 1.21.1 and 1.21 (modern ModDevGradle,
+**JDK 21**), plus Forge and NeoForge 1.20.1 (ModDevGradle legacy, **JDK 17**). Version differences
+live in `//?` preprocessor comments; Gradle's toolchain support fetches the JDK each node needs.
+
+The Iron's Spells API is resolved from Modrinth (`maven.modrinth:irons-spells-n-spellbooks`) per
+version, so a clean clone (CI included) builds with no manual step.
 
 ```
-./gradlew build             # compiles and packages into build/libs/
-./gradlew runClient         # dev client with Iron's Spells loaded
-./gradlew deployToInstance  # copies the jar into a CurseForge instance's mods/ folder
+./gradlew build                    # builds ALL version nodes
+./gradlew :1.21.1:build            # a single node
+./gradlew :1.20.1-forge:build      # Forge 1.20.1
+./gradlew :1.20.1-neoforge:build   # NeoForge 1.20.1
 ```
 
-Point `deployToInstance` at another instance by setting `instance_mods_dir` in your
-`~/.gradle/gradle.properties` instead of editing `build.gradle`.
+Each node's jar lands in `versions/<node>/build/libs/` as
+`spellcooldownhud-<mc>-<loader>-<version>.jar`. The active node for `runClient` and IDE sync is set
+in `stonecutter.gradle.kts` (`stonecutter active "..."`).
+
+```
+./gradlew :1.21.1:runClient          # dev client with Iron's Spells loaded (see libs/ below)
+./gradlew :1.21.1:deployToInstance   # copies the jar into a CurseForge instance's mods/ folder
+```
+
+Point `deployToInstance` at an instance by setting `instance_mods_dir` in your
+`~/.gradle/gradle.properties` instead of editing the build script.
 
 ### `libs/` — only for `runClient`
 
@@ -205,8 +225,10 @@ The dev client runs Iron's Spells for real, and for that it needs its jar and 5 
 Without them `build` still works fine; only `runClient` comes up with no spells.
 
 `libs/*.jar` is in `.gitignore` — we don't redistribute third-party mods, which is why compilation
-uses Modrinth: a clean checkout (CI included) has nothing local to compile against. To populate it,
-copy these files from a CurseForge instance (versions must match `gradle.properties`):
+uses Modrinth: a clean checkout (CI included) has nothing local to compile against. To populate it
+for the **active node** (`stonecutter.gradle.kts`), copy the matching jars from a CurseForge
+instance. For the default `1.21.1` node these are (Iron's Spells versions come from the `nodeSpec`
+block in `build.gradle.kts`, the rest from `gradle.properties`):
 
 ```
 irons_spellbooks-1.21.1-3.16.2.jar
@@ -215,6 +237,10 @@ geckolib-neoforge-1.21.1-4.8.3.jar
 player-animation-lib-forge-2.0.4+1.21.1.jar
 curios-neoforge-9.5.1+1.21.1.jar
 ```
+
+A `1.20.1` dev client would instead need the Forge/NeoForge 1.20.1 builds of those mods; the
+production jars run fine, but the legacy dev client may need remapping, so testing a built jar in a
+real 1.20.1 instance is the reliable path.
 
 Also `libs/irons_spellbooks_at.cfg`: a **sanitized** copy of the access transformer bundled inside
 the Iron's Spells jar, registered in `build.gradle` via `neoForge.accessTransformers`. ModDevGradle

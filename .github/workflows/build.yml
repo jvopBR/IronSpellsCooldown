@@ -12,14 +12,21 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
-      - name: Setup JDK 21
+      # Both JDKs: modern NeoForge (1.21.x) builds on 21, the legacy Forge/NeoForge-1.20.1 nodes on
+      # 17. setup-java exports JAVA_HOME_17_X64 / JAVA_HOME_21_X64, which Gradle's toolchain
+      # auto-detection picks up per version node.
+      - name: Setup JDK 17 and 21
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
+          java-version: |
+            17
+            21
           distribution: 'temurin'
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Build with Gradle
+      # Builds every Stonecutter version node (1.21.1, 1.21, 1.20.1-forge, 1.20.1-neoforge). The
+      # compileOnly Iron's Spells deps come from Modrinth, so no libs/ is needed in CI.
+      - name: Build all versions
         run: ./gradlew build

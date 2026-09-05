@@ -1,0 +1,43 @@
+modLoader = "javafml"
+loaderVersion = "${neo_version_range}"
+license = "${mod_license}"
+
+[[mods]]
+modId = "${mod_id}"
+version = "${mod_version}"
+displayName = "${mod_name}"
+authors = "Merlin"
+description = '''
+Client-side spell cooldown HUD for Iron's Spells 'n Spellbooks.
+Shows the remaining cooldown of every spell after you cast it, with fully
+configurable style, position, colors and content -- and a real cooldown that
+stays accurate even when the server's TPS drops.
+'''
+
+# Iron's Spells is the source of the cooldown data -- without it there is nothing to show.
+#
+# side = "CLIENT" plus zero registered network payloads keeps this mod out of the mod negotiation,
+# so you can join a server that does NOT have it installed -- which is the whole point.
+# NeoForge 1.20.1 (47.x) still reads META-INF/mods.toml with Forge's `mandatory` syntax; only the
+# loader dependency differs (neoforge instead of forge). Iron's Spells here is 1.20.1-3.4.0.
+[[dependencies.${mod_id}]]
+    modId = "irons_spellbooks"
+    mandatory = true
+    versionRange = "[1.20.1-3.4.0,)"
+    # AFTER: the Iron's Spells SpellRegistry must be populated before we resolve spell ids.
+    ordering = "AFTER"
+    side = "CLIENT"
+
+[[dependencies.${mod_id}]]
+    modId = "neoforge"
+    mandatory = true
+    versionRange = "${neo_version_range}"
+    ordering = "NONE"
+    side = "CLIENT"
+
+[[dependencies.${mod_id}]]
+    modId = "minecraft"
+    mandatory = true
+    versionRange = "${minecraft_version_range}"
+    ordering = "NONE"
+    side = "CLIENT"
