@@ -28,7 +28,7 @@ public final class ClientModEvents {
         event.registerAbove(
                 VanillaGuiOverlay.HOTBAR.id(),
                 "spell_cooldowns",
-                new HudLayer(ClientEvents.LIVE));
+                new HudLayer(ClientEvents.LIVE_COOLDOWNS, ClientEvents.LIVE_EFFECTS));
     }
     *///?} else {
     public static void onRegisterGuiLayers(RegisterGuiLayersEvent event) {
@@ -36,7 +36,7 @@ public final class ClientModEvents {
         event.registerAbove(
                 VanillaGuiLayers.HOTBAR,
                 SpellCooldownHud.id("spell_cooldowns"),
-                new HudLayer(ClientEvents.LIVE));
+                new HudLayer(ClientEvents.LIVE_COOLDOWNS, ClientEvents.LIVE_EFFECTS));
     }
     //?}
 

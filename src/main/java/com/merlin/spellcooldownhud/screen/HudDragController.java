@@ -5,8 +5,11 @@ import com.merlin.spellcooldownhud.client.HudLayer;
 import com.merlin.spellcooldownhud.client.HudLayout;
 import com.merlin.spellcooldownhud.config.Anchor;
 import com.merlin.spellcooldownhud.config.HudConfig;
+import com.merlin.spellcooldownhud.config.HudProfile;
 import com.merlin.spellcooldownhud.data.DemoSource;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,7 +21,10 @@ import org.jetbrains.annotations.Nullable;
  */
 public final class HudDragController {
 
-    private final CooldownTracker preview = new CooldownTracker(new DemoSource());
+    private final CooldownTracker preview;
+
+    /** Which group this controller positions: false = cooldowns HUD, true = active-effects HUD. */
+    private final boolean effects;
 
     private boolean dragging;
     private double grabOffsetX;
@@ -27,10 +33,61 @@ public final class HudDragController {
 
     private @Nullable HudLayout lastLayout;
 
+    public HudDragController(boolean effects) {
+        this.effects = effects;
+        this.preview = new CooldownTracker(new DemoSource(), profile());
+    }
+
+    /** This group's profile -- it carries its own anchor/offset (and the rest of the look). */
+    private HudProfile profile() {
+        return effects ? HudConfig.EFFECTS : HudConfig.COOLDOWNS;
+    }
+
+    private Anchor anchor() {
+        return profile().anchor.get();
+    }
+
+    private int offsetX() {
+        return profile().offsetX.get();
+    }
+
+    private int offsetY() {
+        return profile().offsetY.get();
+    }
+
+    private void setAnchor(Anchor a) {
+        profile().anchor.set(a);
+    }
+
+    private void setOffsetX(int x) {
+        profile().offsetX.set(x);
+    }
+
+    private void setOffsetY(int y) {
+        profile().offsetY.set(y);
+    }
+
+    /** This group's current anchor/offset, for the move screen's guides and hint. */
+    public Anchor currentAnchor() {
+        return anchor();
+    }
+
+    public int currentOffsetX() {
+        return offsetX();
+    }
+
+    public int currentOffsetY() {
+        return offsetY();
+    }
+
+    public float currentScale() {
+        return scale();
+    }
+
     /** Draws the preview with fake data and stores the resulting layout. */
     public void drawPreview(GuiGraphics graphics) {
         preview.refresh(HudConfig.CONTENT_MODE.get());
-        lastLayout = HudLayer.draw(graphics, preview, HudConfig.CONTENT_MODE.get());
+        lastLayout = HudLayer.draw(graphics, preview);
     }
 
     public @Nullable HudLayout layout() {
@@ -121,10 +178,10 @@ public final class HudDragController {
         int centerY = (int) Math.round(clampedY + blockHeight / 2.0);
         Anchor anchor = Anchor.nearest(centerX, centerY, scaledWidth, scaledHeight);
 
-        HudConfig.ANCHOR.set(anchor);
-        HudConfig.OFFSET_X.set((int) Math.round(
+        setAnchor(anchor);
+        setOffsetX((int) Math.round(
                 clampedX - (anchor.anchorX(scaledWidth) + anchor.alignX(blockWidth))));
-        HudConfig.OFFSET_Y.set((int) Math.round(
+        setOffsetY((int) Math.round(
                 clampedY - (anchor.anchorY(scaledHeight) + anchor.alignY(blockHeight))));
         dirty = true;
     }
@@ -140,14 +197,36 @@ public final class HudDragController {
         int x1 = Math.round((lastLayout.originX() + lastLayout.width()) * scale) + 2;
         int y1 = Math.round((lastLayout.originY() + lastLayout.height()) * scale) + 2;
 
-        int color = dragging ? 0xFF8CD98C : 0x9078A0FF;
+        int color = outlineColor();
         graphics.fill(x0, y0, x1, y0 + 1, color);
         graphics.fill(x0, y1 - 1, x1, y1, color);
         graphics.fill(x0, y0, x0 + 1, y1, color);
         graphics.fill(x1 - 1, y0, x1, y1, color);
     }
 
-    private static float scale() {
-        return HudConfig.SCALE.get().floatValue();
+    // Cooldowns = blue, effects = amber, so the two groups read apart; brighter while dragging.
+    private int outlineColor() {
+        if (dragging) {
+            return effects ? 0xFFFFC266 : 0xFF8CD98C;
+        }
+        return effects ? 0xA0FFB24D : 0x9078A0FF;
+    }
+
+    /** A small label centered above the group's outline, in its color, so you know which is which. */
+    public void drawLabel(GuiGraphics graphics, Font font, Component label) {
+        if (lastLayout == null) {
+            return;
+        }
+        float scale = scale();
+        int originX = Math.round(lastLayout.originX() * scale);
+        int blockWidth = Math.round(lastLayout.width() * scale);
+        int textX = originX + (blockWidth - font.width(label)) / 2;
+        int textY = Math.round(lastLayout.originY() * scale) - font.lineHeight - 3;
+        int color = effects ? 0xFFFFC266 : 0xFFAFC0FF;
+        graphics.drawString(font, label, textX, Math.max(1, textY), color, true);
+    }
+
+    private float scale() {
+        return profile().scale.get().floatValue();
     }
 }

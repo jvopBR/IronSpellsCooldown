@@ -1,7 +1,7 @@
 package com.merlin.spellcooldownhud.client;
 
 import com.merlin.spellcooldownhud.config.ContentMode;
-import com.merlin.spellcooldownhud.config.HudConfig;
+import com.merlin.spellcooldownhud.config.HudProfile;
 import com.merlin.spellcooldownhud.config.SortMode;
 import com.merlin.spellcooldownhud.data.CooldownEntry;
 import com.merlin.spellcooldownhud.data.CooldownSource;
@@ -36,10 +36,17 @@ public final class CooldownTracker {
     private static final long MS_PER_TICK = 50L;
 
     private final CooldownSource source;
+    private final HudProfile profile;
     private final Map<String, Tracked> tracked = new LinkedHashMap<>();
 
-    public CooldownTracker(CooldownSource source) {
+    public CooldownTracker(CooldownSource source, HudProfile profile) {
         this.source = source;
+        this.profile = profile;
+    }
+
+    /** This tracker's HUD profile (cooldowns or effects). */
+    public HudProfile profile() {
+        return profile;
     }
 
     /** An entry ready to draw: the data plus the resolved animation state. */
@@ -67,7 +74,7 @@ public final class CooldownTracker {
     /** Called every client tick (or per frame, in the editor preview). */
     public void refresh(ContentMode mode) {
         long now = System.currentTimeMillis();
-        long fadeOutMs = HudConfig.FADE_OUT_TICKS.get() * MS_PER_TICK;
+        long fadeOutMs = profile.fadeOutTicks.get() * MS_PER_TICK;
 
         Set<String> present = new HashSet<>();
 
@@ -113,20 +120,20 @@ public final class CooldownTracker {
     }
 
     /** Entries to draw this frame, already sorted, capped and with alpha resolved. */
-    public List<TrackedEntry> snapshot(ContentMode mode, SortMode sortMode, int maxEntries) {
+    public List<TrackedEntry> snapshot() {
         long now = System.currentTimeMillis();
-        float globalOpacity = HudConfig.OPACITY.get().floatValue();
-        long fadeInMs = HudConfig.FADE_IN_TICKS.get() * MS_PER_TICK;
-        long fadeOutMs = HudConfig.FADE_OUT_TICKS.get() * MS_PER_TICK;
-        boolean flashEnabled = HudConfig.FLASH_WHEN_READY.get();
+        float globalOpacity = profile.opacity.get().floatValue();
+        long fadeInMs = profile.fadeInTicks.get() * MS_PER_TICK;
+        long fadeOutMs = profile.fadeOutTicks.get() * MS_PER_TICK;
+        boolean flashEnabled = profile.flashWhenReady.get();
 
         List<CooldownEntry> visible = new ArrayList<>(tracked.size());
         for (Tracked candidate : tracked.values()) {
             visible.add(candidate.entry);
         }
-        visible.sort(comparatorFor(sortMode));
+        visible.sort(comparatorFor(profile.sortMode.get()));
 
-        int limit = Math.min(maxEntries, visible.size());
+        int limit = Math.min(profile.maxEntries.get(), visible.size());
         List<TrackedEntry> out = new ArrayList<>(limit);
 
         for (int i = 0; i < limit; i++) {

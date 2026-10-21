@@ -29,7 +29,7 @@ public final class BarRenderer implements CooldownRenderer {
 
     @Override
     public int cellWidth(int iconSize, List<CooldownTracker.TrackedEntry> entries) {
-        if (!HudConfig.SHOW_NAME.get()) {
+        if (!HudConfig.active.showName.get()) {
             return iconSize;
         }
         int widest = 0;
@@ -52,17 +52,17 @@ public final class BarRenderer implements CooldownRenderer {
 
         graphics.fill(x, y, x + iconSize, y + iconSize, RenderSupport.backgroundColor(alpha));
 
-        if (HudConfig.SHOW_ICON.get()) {
+        if (HudConfig.active.showIcon.get()) {
             // With no sweep on top, the dimming is what tells "on cooldown" from "ready".
-            float iconAlpha = HudConfig.DIM_WHEN_READY.get() && !entry.ready()
+            float iconAlpha = HudConfig.active.dimWhenReady.get() && !entry.ready()
                     ? alpha * (1.0f - DIM_STRENGTH)
                     : alpha;
-            RenderSupport.drawIcon(graphics, entry.icon(), x, y, iconSize, iconAlpha, entry.schoolColor());
+            RenderSupport.drawIcon(graphics, entry, x, y, iconSize, iconAlpha);
         }
 
         RenderSupport.drawReadyFlash(graphics, x, y, iconSize, tracked.readyFlash() * alpha);
 
-        if (HudConfig.DRAW_BORDER.get()) {
+        if (HudConfig.active.drawBorder.get()) {
             RenderSupport.drawBorder(graphics, x, y, iconSize, iconSize,
                     RenderSupport.borderColorFor(entry, alpha));
         }
@@ -71,7 +71,7 @@ public final class BarRenderer implements CooldownRenderer {
 
         RenderSupport.drawOverlays(graphics, entry, x, y, iconSize, alpha);
 
-        if (HudConfig.SHOW_NAME.get()) {
+        if (HudConfig.active.showName.get()) {
             int textY = y + (iconSize - RenderSupport.font().lineHeight) / 2;
             RenderSupport.drawText(graphics, entry.displayName().getString(), x + iconSize + 4, textY, alpha);
         }

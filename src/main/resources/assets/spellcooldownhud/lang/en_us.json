@@ -2,6 +2,9 @@
   "screen.spellcooldownhud.editor": "Spell Cooldown HUD Editor",
   "screen.spellcooldownhud.hint": "Drag the HUD to position it. Arrow keys nudge 1px (Shift = 10px).",
   "screen.spellcooldownhud.move": "Move HUD",
+  "screen.spellcooldownhud.groupCooldowns": "Cooldowns",
+  "screen.spellcooldownhud.groupEffects": "Effects",
+  "screen.spellcooldownhud.editingGroup": "Editing",
   "screen.spellcooldownhud.moveHint": "Click and drag the HUD wherever you want. Arrow keys nudge 1px (Shift = 10px).",
   "screen.spellcooldownhud.openSettings": "Settings",
   "screen.spellcooldownhud.currentAnchor": "Anchor",
@@ -40,6 +43,7 @@
   "option.spellcooldownhud.showName": "Spell name",
   "option.spellcooldownhud.showTimer": "Time remaining",
   "option.spellcooldownhud.showLevel": "Spell level",
+  "option.spellcooldownhud.showManaCost": "Mana cost",
   "option.spellcooldownhud.drawBorder": "Border",
 
   "option.spellcooldownhud.useSchoolColor": "School color",
@@ -58,6 +62,7 @@
 
   "option.spellcooldownhud.contentmode.ONLY_ON_COOLDOWN": "On cooldown only",
   "option.spellcooldownhud.contentmode.ALL_EQUIPPED": "All equipped",
+  "option.spellcooldownhud.showActiveEffects": "Active effects",
 
   "option.spellcooldownhud.sortmode.TIME_REMAINING_ASC": "Least time",
   "option.spellcooldownhud.sortmode.TIME_REMAINING_DESC": "Most time",

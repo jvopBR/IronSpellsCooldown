@@ -1,6 +1,6 @@
 package com.merlin.spellcooldownhud.config;
 
-/** Which spells the HUD shows. */
+/** Which spells the HUD shows. Active effects are an additive overlay, not a mode (see HudConfig). */
 public enum ContentMode {
     /** Only spells on cooldown: they appear on cast and vanish when ready. */
     ONLY_ON_COOLDOWN,
