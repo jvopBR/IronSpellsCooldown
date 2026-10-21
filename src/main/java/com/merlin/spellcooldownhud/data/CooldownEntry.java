@@ -3,6 +3,7 @@ package com.merlin.spellcooldownhud.data;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A spell to draw on the HUD, already translated into plain Minecraft types.
@@ -16,20 +17,26 @@ import net.minecraft.util.Mth;
  * @param icon           icon texture, already a full path, or null if the spell has none
  * @param displayName    translated name
  * @param level          spell level; 0 when unknown
+ * @param manaCost       mana cost to cast at the shown level; 0 when unknown
  * @param remainingTicks ticks left until ready; 0 = ready
  * @param totalTicks     total cooldown duration, to compute the fraction
  * @param schoolColor    RGB of the spell's school (no alpha)
  * @param slotIndex      position in the spellbook, for stable ordering; -1 if unknown
+ * @param effectIcon     for ACTIVE_EFFECTS entries, an opaque MobEffect handle (Holder&lt;MobEffect&gt;
+ *                       on 1.21, MobEffect on 1.20.1) that RenderSupport draws as the effect sprite;
+ *                       null for spell entries, which use {@code icon} instead
  */
 public record CooldownEntry(
         String spellId,
         ResourceLocation icon,
         Component displayName,
         int level,
+        int manaCost,
         int remainingTicks,
         int totalTicks,
         int schoolColor,
-        int slotIndex) {
+        int slotIndex,
+        @Nullable Object effectIcon) {
 
     public boolean ready() {
         return remainingTicks <= 0;
@@ -50,6 +57,6 @@ public record CooldownEntry(
      * to replace the client's local count with the server's.
      */
     public CooldownEntry withRemaining(int ticks) {
-        return new CooldownEntry(spellId, icon, displayName, level, ticks, totalTicks, schoolColor, slotIndex);
+        return new CooldownEntry(spellId, icon, displayName, level, manaCost, ticks, totalTicks, schoolColor, slotIndex, effectIcon);
     }
 }

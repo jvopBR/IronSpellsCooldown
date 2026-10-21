@@ -1,8 +1,8 @@
 package com.merlin.spellcooldownhud.client;
 
 import com.merlin.spellcooldownhud.client.render.CooldownRenderer;
-import com.merlin.spellcooldownhud.config.ContentMode;
 import com.merlin.spellcooldownhud.config.HudConfig;
+import com.merlin.spellcooldownhud.config.HudProfile;
 import com.merlin.spellcooldownhud.screen.HudPreviewScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -30,10 +30,12 @@ import java.util.List;
 public final class HudLayer implements LayeredDraw.Layer {
 //?}
 
-    private final CooldownTracker tracker;
+    private final CooldownTracker cooldowns;
+    private final CooldownTracker effects;
 
-    public HudLayer(CooldownTracker tracker) {
-        this.tracker = tracker;
+    public HudLayer(CooldownTracker cooldowns, CooldownTracker effects) {
+        this.cooldowns = cooldowns;
+        this.effects = effects;
     }
 
     @Override
@@ -45,7 +47,10 @@ public final class HudLayer implements LayeredDraw.Layer {
         if (!shouldRender()) {
             return;
         }
-        draw(graphics, tracker, HudConfig.CONTENT_MODE.get());
+        draw(graphics, cooldowns);
+        if (HudConfig.SHOW_ACTIVE_EFFECTS.get()) {
+            draw(graphics, effects);
+        }
     }
 
     private static boolean shouldRender() {
@@ -67,25 +72,26 @@ public final class HudLayer implements LayeredDraw.Layer {
      * Draws the HUD and returns the layout used, which the editor reuses to know where the drag
      * rectangle is.
      */
-    public static HudLayout draw(GuiGraphics graphics, CooldownTracker tracker, ContentMode mode) {
-        List<CooldownTracker.TrackedEntry> entries = tracker.snapshot(
-                mode, HudConfig.SORT_MODE.get(), HudConfig.MAX_ENTRIES.get());
+    public static HudLayout draw(GuiGraphics graphics, CooldownTracker tracker) {
+        HudProfile profile = tracker.profile();
+        HudConfig.active = profile; // RenderSupport and the renderers read the active profile
+        List<CooldownTracker.TrackedEntry> entries = tracker.snapshot();
 
-        CooldownRenderer renderer = CooldownRenderer.forStyle(HudConfig.STYLE.get());
-        int iconSize = HudConfig.ICON_SIZE.get();
+        CooldownRenderer renderer = CooldownRenderer.forStyle(profile.style.get());
+        int iconSize = profile.iconSize.get();
         int cellWidth = renderer.cellWidth(iconSize, entries);
         int cellHeight = renderer.cellHeight(iconSize);
 
         // The mod's scale multiplies the game's GUI scale. We compute the anchoring in the ALREADY
         // scaled space, otherwise a right-anchored HUD would fall off-screen as the scale grows.
-        float scale = HudConfig.SCALE.get().floatValue();
+        float scale = profile.scale.get().floatValue();
         int screenWidth = Mth.floor(graphics.guiWidth() / scale);
         int screenHeight = Mth.floor(graphics.guiHeight() / scale);
 
         HudLayout layout = HudLayout.compute(
                 entries.size(), cellWidth, cellHeight,
-                HudConfig.SPACING.get(), HudConfig.GROW_DIRECTION.get(), HudConfig.MAX_PER_LINE.get(),
-                HudConfig.ANCHOR.get(), HudConfig.OFFSET_X.get(), HudConfig.OFFSET_Y.get(),
+                profile.spacing.get(), profile.growDirection.get(), profile.maxPerLine.get(),
+                profile.anchor.get(), profile.offsetX.get(), profile.offsetY.get(),
                 screenWidth, screenHeight);
 
         if (entries.isEmpty()) {

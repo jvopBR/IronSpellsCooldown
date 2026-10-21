@@ -125,10 +125,21 @@ public final class IronSpellsSource implements CooldownSource {
                 iconOf(spell),
                 displayNameOf(spell, player),
                 level,
+                manaCostOf(spell, level),
                 Math.max(0, remainingTicks),
                 Math.max(0, totalTicks),
                 schoolColorOf(spell),
-                slotIndex);
+                slotIndex,
+                null);
+    }
+
+    /** Mana cost at the given level. Level 0 (unknown) is read as level 1 so the number makes sense. */
+    private static int manaCostOf(AbstractSpell spell, int level) {
+        try {
+            return Math.max(0, spell.getManaCost(Math.max(1, level)));
+        } catch (RuntimeException e) {
+            return 0;
+        }
     }
 
     private static Map<String, Integer> equippedLevels() {

@@ -2,6 +2,9 @@
   "screen.spellcooldownhud.editor": "Editor del HUD de Enfriamientos",
   "screen.spellcooldownhud.hint": "Arrastra el HUD para colocarlo. Flechas mueven 1px (Mayús = 10px).",
   "screen.spellcooldownhud.move": "Mover HUD",
+  "screen.spellcooldownhud.groupCooldowns": "Enfriamientos",
+  "screen.spellcooldownhud.groupEffects": "Efectos",
+  "screen.spellcooldownhud.editingGroup": "Editando",
   "screen.spellcooldownhud.moveHint": "Haz clic y arrastra el HUD a donde quieras. Flechas mueven 1px (Mayús = 10px).",
   "screen.spellcooldownhud.openSettings": "Ajustes",
   "screen.spellcooldownhud.currentAnchor": "Anclaje",
@@ -40,6 +43,7 @@
   "option.spellcooldownhud.showName": "Nombre del hechizo",
   "option.spellcooldownhud.showTimer": "Tiempo restante",
   "option.spellcooldownhud.showLevel": "Nivel del hechizo",
+  "option.spellcooldownhud.showManaCost": "Costo de maná",
   "option.spellcooldownhud.drawBorder": "Borde",
 
   "option.spellcooldownhud.useSchoolColor": "Color de escuela",
@@ -58,6 +62,7 @@
 
   "option.spellcooldownhud.contentmode.ONLY_ON_COOLDOWN": "Solo en enfriamiento",
   "option.spellcooldownhud.contentmode.ALL_EQUIPPED": "Todos equipados",
+  "option.spellcooldownhud.showActiveEffects": "Efectos activos",
 
   "option.spellcooldownhud.sortmode.TIME_REMAINING_ASC": "Menos tiempo",
   "option.spellcooldownhud.sortmode.TIME_REMAINING_DESC": "Más tiempo",

@@ -25,23 +25,32 @@ public final class TextListRenderer implements CooldownRenderer {
     /** Minimum gap between the name and the time, so they don't touch. */
     private static final int COLUMN_GAP = 8;
 
+    /** Gap between the name and the mana cost, when shown. */
+    private static final int MANA_GAP = 3;
+
     private TextListRenderer() {
     }
 
     @Override
     public int cellWidth(int iconSize, List<CooldownTracker.TrackedEntry> entries) {
         Font font = RenderSupport.font();
+        boolean showMana = HudConfig.active.showMana.get();
         int widestName = 0;
         int widestTimer = 0;
+        int widestMana = 0;
 
         for (CooldownTracker.TrackedEntry tracked : entries) {
             CooldownEntry entry = tracked.entry();
             widestName = Math.max(widestName, font.width(entry.displayName().getString()));
             widestTimer = Math.max(widestTimer, font.width(timerText(entry)));
+            if (showMana && entry.manaCost() > 0) {
+                widestMana = Math.max(widestMana, font.width(String.valueOf(entry.manaCost())));
+            }
         }
 
-        int iconWidth = HudConfig.SHOW_ICON.get() ? lineHeight() + 2 : 0;
-        return iconWidth + widestName + COLUMN_GAP + widestTimer + PADDING_X * 2;
+        int iconWidth = HudConfig.active.showIcon.get() ? lineHeight() + 2 : 0;
+        int manaWidth = widestMana > 0 ? MANA_GAP + widestMana : 0;
+        return iconWidth + widestName + manaWidth + COLUMN_GAP + widestTimer + PADDING_X * 2;
     }
 
     @Override
@@ -62,15 +71,20 @@ public final class TextListRenderer implements CooldownRenderer {
         int cursorX = x + PADDING_X;
 
         // In text mode the icon is optional and drawn small, the height of a line.
-        if (HudConfig.SHOW_ICON.get()) {
+        if (HudConfig.active.showIcon.get()) {
             int small = lineHeight();
-            RenderSupport.drawIcon(graphics, entry.icon(), cursorX, textY, small, alpha, entry.schoolColor());
+            RenderSupport.drawIcon(graphics, entry, cursorX, textY, small, alpha);
             cursorX += small + 2;
         }
 
         RenderSupport.drawText(graphics, entry.displayName().getString(), cursorX, textY, alpha);
 
-        if (HudConfig.SHOW_TIMER.get()) {
+        if (HudConfig.active.showMana.get() && entry.manaCost() > 0) {
+            int manaX = cursorX + font.width(entry.displayName().getString()) + MANA_GAP;
+            RenderSupport.drawManaText(graphics, String.valueOf(entry.manaCost()), manaX, textY, alpha);
+        }
+
+        if (HudConfig.active.showTimer.get()) {
             String timer = timerText(entry);
             RenderSupport.drawText(graphics, timer, x + cellWidth - PADDING_X - font.width(timer), textY, alpha);
         }

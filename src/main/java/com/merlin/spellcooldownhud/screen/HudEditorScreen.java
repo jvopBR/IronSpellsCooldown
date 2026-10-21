@@ -6,6 +6,7 @@ import com.merlin.spellcooldownhud.config.CachedColor;
 import com.merlin.spellcooldownhud.config.ContentMode;
 import com.merlin.spellcooldownhud.config.GrowDirection;
 import com.merlin.spellcooldownhud.config.HudConfig;
+import com.merlin.spellcooldownhud.config.HudProfile;
 import com.merlin.spellcooldownhud.config.HudStyle;
 import com.merlin.spellcooldownhud.config.SortMode;
 import com.merlin.spellcooldownhud.config.TimerFormat;
@@ -63,10 +64,14 @@ public final class HudEditorScreen extends Screen implements HudPreviewScreen {
     private static final int NUDGE_STEP_FAST = 10;
 
     private final @Nullable Screen parent;
-    private final HudDragController drag = new HudDragController();
     private final List<ColorRow> colorRows = new ArrayList<>();
 
     private Tab tab = Tab.CONTENT;
+
+    /** Which HUD the editor is tuning: false = cooldowns, true = active effects. */
+    private boolean editingEffects;
+    // Not final: it's recreated when the group switches, so its preview tracks the selected HUD.
+    private HudDragController drag = new HudDragController(false);
 
     private record ColorRow(String labelKey, EditBox box, int y) {
     }
@@ -74,6 +79,11 @@ public final class HudEditorScreen extends Screen implements HudPreviewScreen {
     public HudEditorScreen(@Nullable Screen parent) {
         super(Component.translatable("screen.spellcooldownhud.editor"));
         this.parent = parent;
+    }
+
+    /** The profile being edited -- every per-HUD control reads and writes through here. */
+    private HudProfile profile() {
+        return editingEffects ? HudConfig.EFFECTS : HudConfig.COOLDOWNS;
     }
 
     /** The game keeps running behind: the HUD needs tuning in context, not on a dead screen. */
@@ -88,7 +98,14 @@ public final class HudEditorScreen extends Screen implements HudPreviewScreen {
     protected void init() {
         colorRows.clear();
 
+        // The effects HUD can be turned off from the content tab; don't stay stuck editing a hidden one.
+        if (editingEffects && !HudConfig.SHOW_ACTIVE_EFFECTS.get()) {
+            editingEffects = false;
+            drag = new HudDragController(false);
+        }
+
         int y = MARGIN + 14;
+        y = buildGroupSwitch(y);
         y = buildTabs(y);
         y += ROW_GAP;
 
@@ -101,6 +118,29 @@ public final class HudEditorScreen extends Screen implements HudPreviewScreen {
         }
 
         buildFooter();
+    }
+
+    /**
+     * Group selector at the top: which of the two HUDs this editor is tuning. Only shown when the
+     * effects HUD exists; otherwise there's only one HUD and nothing to switch between.
+     */
+    private int buildGroupSwitch(int y) {
+        if (!HudConfig.SHOW_ACTIVE_EFFECTS.get()) {
+            return y;
+        }
+        addRenderableWidget(Button.builder(groupSwitchLabel(), b -> {
+            editingEffects = !editingEffects;
+            drag = new HudDragController(editingEffects);
+            rebuildWidgets();
+        }).bounds(MARGIN, y, contentWidth(), ROW_HEIGHT).build());
+        return y + ROW_HEIGHT + ROW_GAP;
+    }
+
+    private Component groupSwitchLabel() {
+        String groupKey = editingEffects
+                ? "screen.spellcooldownhud.groupEffects" : "screen.spellcooldownhud.groupCooldowns";
+        return Component.translatable("screen.spellcooldownhud.editingGroup")
+                .append(": ").append(Component.translatable(groupKey));
     }
 
     private int buildTabs(int y) {
@@ -130,13 +170,28 @@ public final class HudEditorScreen extends Screen implements HudPreviewScreen {
     }
 
     private void buildContentTab(int y) {
-        y = addRow(enumButton(y, "option.spellcooldownhud.contentMode",
-                HudConfig.CONTENT_MODE, ContentMode.values()));
+        // contentMode picks WHAT the cooldown HUD lists; the effects HUD always lists active effects.
+        if (!editingEffects) {
+            y = addRow(enumButton(y, "option.spellcooldownhud.contentMode",
+                    HudConfig.CONTENT_MODE, ContentMode.values()));
+        }
         y = addRow(enumButton(y, "option.spellcooldownhud.sortMode",
-                HudConfig.SORT_MODE, SortMode.values()));
-        y = addRow(new IntSlider(y, "option.spellcooldownhud.maxEntries", HudConfig.MAX_ENTRIES, 1, 32));
-        y = addRow(toggleButton(y, "option.spellcooldownhud.hideInF1", HudConfig.HIDE_IN_F1));
-        addRow(toggleButton(y, "option.spellcooldownhud.useServerTime", HudConfig.USE_SERVER_TIME));
+                profile().sortMode, SortMode.values()));
+        y = addRow(new IntSlider(y, "option.spellcooldownhud.maxEntries", profile().maxEntries, 1, 32));
+
+        // The rest are shared/global switches; they live on the cooldowns tab so they appear once.
+        if (!editingEffects) {
+            y = addRow(toggleButton(y, "option.spellcooldownhud.hideInF1", HudConfig.HIDE_IN_F1));
+            y = addRow(toggleButton(y, "option.spellcooldownhud.useServerTime", HudConfig.USE_SERVER_TIME));
+            // Rebuilds the screen so the group switch above appears/disappears with this toggle.
+            addRenderableWidget(Button.builder(
+                    boolLabel("option.spellcooldownhud.showActiveEffects", HudConfig.SHOW_ACTIVE_EFFECTS.get()),
+                    b -> {
+                        HudConfig.SHOW_ACTIVE_EFFECTS.set(!HudConfig.SHOW_ACTIVE_EFFECTS.get());
+                        markDirty();
+                        rebuildWidgets();
+                    }).bounds(MARGIN, y, contentWidth(), ROW_HEIGHT).build());
+        }
     }
 
     private void buildLayoutTab(int y) {
@@ -146,48 +201,49 @@ public final class HudEditorScreen extends Screen implements HudPreviewScreen {
             }
         }).bounds(MARGIN, y, contentWidth(), ROW_HEIGHT).build());
 
-        y = addRow(enumButton(y, "option.spellcooldownhud.anchor", HudConfig.ANCHOR, Anchor.values()));
+        y = addRow(enumButton(y, "option.spellcooldownhud.anchor", profile().anchor, Anchor.values()));
         y = addRow(enumButton(y, "option.spellcooldownhud.growDirection",
-                HudConfig.GROW_DIRECTION, GrowDirection.values()));
-        y = addRow(new IntSlider(y, "option.spellcooldownhud.iconSize", HudConfig.ICON_SIZE, 8, 48));
-        y = addRow(new IntSlider(y, "option.spellcooldownhud.spacing", HudConfig.SPACING, 0, 24));
-        y = addRow(new IntSlider(y, "option.spellcooldownhud.maxPerLine", HudConfig.MAX_PER_LINE, 1, 16));
+                profile().growDirection, GrowDirection.values()));
+        y = addRow(new IntSlider(y, "option.spellcooldownhud.iconSize", profile().iconSize, 8, 48));
+        y = addRow(new IntSlider(y, "option.spellcooldownhud.spacing", profile().spacing, 0, 24));
+        y = addRow(new IntSlider(y, "option.spellcooldownhud.maxPerLine", profile().maxPerLine, 1, 16));
 
         addRow(Button.builder(Component.translatable("option.spellcooldownhud.resetPosition"), b -> {
-            HudConfig.OFFSET_X.set(0);
-            HudConfig.OFFSET_Y.set(0);
+            profile().offsetX.set(0);
+            profile().offsetY.set(0);
             markDirty();
         }).bounds(MARGIN, y, contentWidth(), ROW_HEIGHT).build());
     }
 
     private void buildStyleTab(int y) {
-        y = addRow(enumButton(y, "option.spellcooldownhud.style", HudConfig.STYLE, HudStyle.values()));
+        y = addRow(enumButton(y, "option.spellcooldownhud.style", profile().style, HudStyle.values()));
         y = addRow(enumButton(y, "option.spellcooldownhud.timerFormat",
-                HudConfig.TIMER_FORMAT, TimerFormat.values()));
-        y = addRow(toggleButton(y, "option.spellcooldownhud.showIcon", HudConfig.SHOW_ICON));
-        y = addRow(toggleButton(y, "option.spellcooldownhud.showName", HudConfig.SHOW_NAME));
-        y = addRow(toggleButton(y, "option.spellcooldownhud.showTimer", HudConfig.SHOW_TIMER));
-        y = addRow(toggleButton(y, "option.spellcooldownhud.showLevel", HudConfig.SHOW_LEVEL));
-        addRow(toggleButton(y, "option.spellcooldownhud.drawBorder", HudConfig.DRAW_BORDER));
+                profile().timerFormat, TimerFormat.values()));
+        y = addRow(toggleButton(y, "option.spellcooldownhud.showIcon", profile().showIcon));
+        y = addRow(toggleButton(y, "option.spellcooldownhud.showName", profile().showName));
+        y = addRow(toggleButton(y, "option.spellcooldownhud.showTimer", profile().showTimer));
+        y = addRow(toggleButton(y, "option.spellcooldownhud.showLevel", profile().showLevel));
+        y = addRow(toggleButton(y, "option.spellcooldownhud.showManaCost", profile().showMana));
+        addRow(toggleButton(y, "option.spellcooldownhud.drawBorder", profile().drawBorder));
     }
 
     private void buildColorsTab(int y) {
-        y = addRow(toggleButton(y, "option.spellcooldownhud.useSchoolColor", HudConfig.USE_SCHOOL_COLOR));
+        y = addRow(toggleButton(y, "option.spellcooldownhud.useSchoolColor", profile().useSchoolColor));
 
-        y = addColorRow(y, "option.spellcooldownhud.backgroundColor", HudConfig.BACKGROUND_COLOR.raw());
-        y = addColorRow(y, "option.spellcooldownhud.sweepColor", HudConfig.SWEEP_COLOR.raw());
-        y = addColorRow(y, "option.spellcooldownhud.borderColor", HudConfig.BORDER_COLOR.raw());
-        y = addColorRow(y, "option.spellcooldownhud.textColor", HudConfig.TEXT_COLOR.raw());
-        addColorRow(y, "option.spellcooldownhud.readyFlashColor", HudConfig.READY_FLASH_COLOR.raw());
+        y = addColorRow(y, "option.spellcooldownhud.backgroundColor", profile().backgroundColor.raw());
+        y = addColorRow(y, "option.spellcooldownhud.sweepColor", profile().sweepColor.raw());
+        y = addColorRow(y, "option.spellcooldownhud.borderColor", profile().borderColor.raw());
+        y = addColorRow(y, "option.spellcooldownhud.textColor", profile().textColor.raw());
+        addColorRow(y, "option.spellcooldownhud.readyFlashColor", profile().readyFlashColor.raw());
     }
 
     private void buildEffectsTab(int y) {
-        y = addRow(new DoubleSlider(y, "option.spellcooldownhud.opacity", HudConfig.OPACITY, 0.05, 1.0));
-        y = addRow(new DoubleSlider(y, "option.spellcooldownhud.scale", HudConfig.SCALE, 0.25, 3.0));
-        y = addRow(new IntSlider(y, "option.spellcooldownhud.fadeIn", HudConfig.FADE_IN_TICKS, 0, 40));
-        y = addRow(new IntSlider(y, "option.spellcooldownhud.fadeOut", HudConfig.FADE_OUT_TICKS, 0, 40));
-        y = addRow(toggleButton(y, "option.spellcooldownhud.flashWhenReady", HudConfig.FLASH_WHEN_READY));
-        addRow(toggleButton(y, "option.spellcooldownhud.dimWhenOnCooldown", HudConfig.DIM_WHEN_READY));
+        y = addRow(new DoubleSlider(y, "option.spellcooldownhud.opacity", profile().opacity, 0.05, 1.0));
+        y = addRow(new DoubleSlider(y, "option.spellcooldownhud.scale", profile().scale, 0.25, 3.0));
+        y = addRow(new IntSlider(y, "option.spellcooldownhud.fadeIn", profile().fadeInTicks, 0, 40));
+        y = addRow(new IntSlider(y, "option.spellcooldownhud.fadeOut", profile().fadeOutTicks, 0, 40));
+        y = addRow(toggleButton(y, "option.spellcooldownhud.flashWhenReady", profile().flashWhenReady));
+        addRow(toggleButton(y, "option.spellcooldownhud.dimWhenOnCooldown", profile().dimWhenReady));
     }
 
     private void buildFooter() {
@@ -481,19 +537,27 @@ public final class HudEditorScreen extends Screen implements HudPreviewScreen {
     // ------------------------------------------------------------------ lifecycle
 
     private void resetAll() {
-        List<ConfigValue<?>> values = List.of(
-                HudConfig.CONTENT_MODE, HudConfig.SORT_MODE, HudConfig.MAX_ENTRIES,
-                HudConfig.HIDE_IN_F1, HudConfig.USE_SERVER_TIME,
-                HudConfig.ANCHOR, HudConfig.OFFSET_X, HudConfig.OFFSET_Y, HudConfig.GROW_DIRECTION,
-                HudConfig.ICON_SIZE, HudConfig.SPACING, HudConfig.MAX_PER_LINE,
-                HudConfig.STYLE, HudConfig.SHOW_ICON, HudConfig.SHOW_NAME, HudConfig.SHOW_TIMER,
-                HudConfig.TIMER_FORMAT, HudConfig.SHOW_LEVEL, HudConfig.DRAW_BORDER,
-                HudConfig.USE_SCHOOL_COLOR,
-                HudConfig.BACKGROUND_COLOR.raw(), HudConfig.SWEEP_COLOR.raw(),
-                HudConfig.BORDER_COLOR.raw(), HudConfig.TEXT_COLOR.raw(),
-                HudConfig.READY_FLASH_COLOR.raw(),
-                HudConfig.OPACITY, HudConfig.SCALE, HudConfig.FADE_IN_TICKS, HudConfig.FADE_OUT_TICKS,
-                HudConfig.FLASH_WHEN_READY, HudConfig.DIM_WHEN_READY);
+        // The selected HUD's own look -- the only thing "Reset all" touches when editing effects.
+        List<ConfigValue<?>> values = new ArrayList<>(List.of(
+                profile().sortMode, profile().maxEntries,
+                profile().anchor, profile().offsetX, profile().offsetY, profile().growDirection,
+                profile().iconSize, profile().spacing, profile().maxPerLine,
+                profile().style, profile().showIcon, profile().showName, profile().showTimer,
+                profile().timerFormat, profile().showLevel, profile().showMana, profile().drawBorder,
+                profile().useSchoolColor,
+                profile().backgroundColor.raw(), profile().sweepColor.raw(),
+                profile().borderColor.raw(), profile().textColor.raw(),
+                profile().readyFlashColor.raw(),
+                profile().opacity, profile().scale, profile().fadeInTicks, profile().fadeOutTicks,
+                profile().flashWhenReady, profile().dimWhenReady));
+
+        // The shared/global switches belong to the cooldowns tab, so only reset them from there.
+        if (!editingEffects) {
+            values.add(HudConfig.CONTENT_MODE);
+            values.add(HudConfig.HIDE_IN_F1);
+            values.add(HudConfig.USE_SERVER_TIME);
+            values.add(HudConfig.SHOW_ACTIVE_EFFECTS);
+        }
 
         for (ConfigValue<?> value : values) {
             restoreDefault(value);

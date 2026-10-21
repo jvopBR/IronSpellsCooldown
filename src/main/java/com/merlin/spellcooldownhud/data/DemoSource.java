@@ -63,10 +63,12 @@ public final class DemoSource implements CooldownSource {
                     null, // no icon: the renderers draw a colored square instead
                     Component.literal(name),
                     1 + (i % 5),
+                    10 + i * 15,
                     total,
                     total,
                     PLACEHOLDER_COLORS[i % PLACEHOLDER_COLORS.length],
-                    i));
+                    i,
+                    null));
         }
         return entries;
     }

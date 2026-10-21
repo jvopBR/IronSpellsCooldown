@@ -21,7 +21,7 @@ public final class RadialRenderer implements CooldownRenderer {
 
     @Override
     public int cellWidth(int iconSize, List<CooldownTracker.TrackedEntry> entries) {
-        if (!HudConfig.SHOW_NAME.get()) {
+        if (!HudConfig.active.showName.get()) {
             return iconSize;
         }
         // With names, every cell uses the widest name's width so the columns align.
@@ -45,8 +45,8 @@ public final class RadialRenderer implements CooldownRenderer {
 
         graphics.fill(x, y, x + iconSize, y + iconSize, RenderSupport.backgroundColor(alpha));
 
-        if (HudConfig.SHOW_ICON.get()) {
-            RenderSupport.drawIcon(graphics, entry.icon(), x, y, iconSize, alpha, entry.schoolColor());
+        if (HudConfig.active.showIcon.get()) {
+            RenderSupport.drawIcon(graphics, entry, x, y, iconSize, alpha);
         }
 
         // The sweep covers the part still remaining, shrinking as the cooldown runs.
@@ -55,14 +55,14 @@ public final class RadialRenderer implements CooldownRenderer {
 
         RenderSupport.drawReadyFlash(graphics, x, y, iconSize, tracked.readyFlash() * alpha);
 
-        if (HudConfig.DRAW_BORDER.get()) {
+        if (HudConfig.active.drawBorder.get()) {
             RenderSupport.drawBorder(graphics, x, y, iconSize, iconSize,
                     RenderSupport.borderColorFor(entry, alpha));
         }
 
         RenderSupport.drawOverlays(graphics, entry, x, y, iconSize, alpha);
 
-        if (HudConfig.SHOW_NAME.get()) {
+        if (HudConfig.active.showName.get()) {
             int textY = y + (iconSize - RenderSupport.font().lineHeight) / 2;
             RenderSupport.drawText(graphics, entry.displayName().getString(), x + iconSize + 4, textY, alpha);
         }

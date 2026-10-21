@@ -2,6 +2,9 @@
   "screen.spellcooldownhud.editor": "Редактор HUD перезарядки",
   "screen.spellcooldownhud.hint": "Перетащите HUD для размещения. Стрелки — 1px (Shift = 10px).",
   "screen.spellcooldownhud.move": "Переместить HUD",
+  "screen.spellcooldownhud.groupCooldowns": "Перезарядки",
+  "screen.spellcooldownhud.groupEffects": "Эффекты",
+  "screen.spellcooldownhud.editingGroup": "Редактирование",
   "screen.spellcooldownhud.moveHint": "Нажмите и перетащите HUD куда угодно. Стрелки — 1px (Shift = 10px).",
   "screen.spellcooldownhud.openSettings": "Настройки",
   "screen.spellcooldownhud.currentAnchor": "Привязка",
@@ -40,6 +43,7 @@
   "option.spellcooldownhud.showName": "Название заклинания",
   "option.spellcooldownhud.showTimer": "Оставшееся время",
   "option.spellcooldownhud.showLevel": "Уровень заклинания",
+  "option.spellcooldownhud.showManaCost": "Стоимость маны",
   "option.spellcooldownhud.drawBorder": "Рамка",
 
   "option.spellcooldownhud.useSchoolColor": "Цвет школы",
@@ -58,6 +62,7 @@
 
   "option.spellcooldownhud.contentmode.ONLY_ON_COOLDOWN": "Только на перезарядке",
   "option.spellcooldownhud.contentmode.ALL_EQUIPPED": "Все снаряжённые",
+  "option.spellcooldownhud.showActiveEffects": "Активные эффекты",
 
   "option.spellcooldownhud.sortmode.TIME_REMAINING_ASC": "Меньше времени",
   "option.spellcooldownhud.sortmode.TIME_REMAINING_DESC": "Больше времени",

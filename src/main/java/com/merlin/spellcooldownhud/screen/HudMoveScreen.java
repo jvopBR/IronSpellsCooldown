@@ -32,7 +32,12 @@ public final class HudMoveScreen extends Screen implements HudPreviewScreen {
     private static final int GUIDE_SIZE = 5;
 
     private final @Nullable Screen parent;
-    private final HudDragController drag = new HudDragController();
+    private final HudDragController cooldowns = new HudDragController(false);
+    private final @Nullable HudDragController effects =
+            HudConfig.SHOW_ACTIVE_EFFECTS.get() ? new HudDragController(true) : null;
+
+    private @Nullable HudDragController activeDrag; // the group currently being dragged
+    private HudDragController selected = cooldowns; // target for arrow-key nudges
 
     public HudMoveScreen(@Nullable Screen parent) {
         super(Component.translatable("screen.spellcooldownhud.move"));
@@ -89,8 +94,14 @@ public final class HudMoveScreen extends Screen implements HudPreviewScreen {
         }
 
         drawAnchorGuides(graphics);
-        drag.drawPreview(graphics);
-        drag.drawOutline(graphics);
+        cooldowns.drawPreview(graphics);
+        cooldowns.drawOutline(graphics);
+        cooldowns.drawLabel(graphics, font, Component.translatable("screen.spellcooldownhud.groupCooldowns"));
+        if (effects != null) {
+            effects.drawPreview(graphics);
+            effects.drawOutline(graphics);
+            effects.drawLabel(graphics, font, Component.translatable("screen.spellcooldownhud.groupEffects"));
+        }
 
         // Draws the buttons; the renderBackground above is already the transparent no-op.
         super.render(graphics, mouseX, mouseY, partialTick);
@@ -99,8 +110,8 @@ public final class HudMoveScreen extends Screen implements HudPreviewScreen {
     }
 
     private void drawAnchorGuides(GuiGraphics graphics) {
-        Anchor active = HudConfig.ANCHOR.get();
-        float scale = HudConfig.SCALE.get().floatValue();
+        Anchor active = selected.currentAnchor();
+        float scale = selected.currentScale();
         int scaledWidth = Mth.floor(width / scale);
         int scaledHeight = Mth.floor(height / scale);
 
@@ -118,11 +129,12 @@ public final class HudMoveScreen extends Screen implements HudPreviewScreen {
         Component hint = Component.translatable("screen.spellcooldownhud.moveHint");
         graphics.drawString(font, hint, (width - font.width(hint)) / 2, MARGIN, 0xFFFFFFFF, true);
 
-        Component anchorLine = Component.translatable("screen.spellcooldownhud.currentAnchor")
-                .append(": ")
-                .append(Component.translatable("option.spellcooldownhud.anchor."
-                        + HudConfig.ANCHOR.get().name()))
-                .append(String.format("  (%d, %d)", HudConfig.OFFSET_X.get(), HudConfig.OFFSET_Y.get()));
+        String groupKey = selected == effects
+                ? "screen.spellcooldownhud.groupEffects" : "screen.spellcooldownhud.groupCooldowns";
+        Component anchorLine = Component.translatable(groupKey)
+                .append(" — ")
+                .append(Component.translatable("option.spellcooldownhud.anchor." + selected.currentAnchor().name()))
+                .append(String.format("  (%d, %d)", selected.currentOffsetX(), selected.currentOffsetY()));
         graphics.drawString(font, anchorLine,
                 (width - font.width(anchorLine)) / 2, MARGIN + font.lineHeight + 2, 0xFFC8C8D2, true);
     }
@@ -135,14 +147,24 @@ public final class HudMoveScreen extends Screen implements HudPreviewScreen {
         if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT) {
             return false;
         }
-        // minX = 0: the whole screen is grabbable, including the left edge.
-        return drag.beginDrag(mouseX, mouseY, 0);
+        // minX = 0: the whole screen is grabbable. Try the effects group first (drawn on top).
+        if (effects != null && effects.beginDrag(mouseX, mouseY, 0)) {
+            activeDrag = effects;
+            selected = effects;
+            return true;
+        }
+        if (cooldowns.beginDrag(mouseX, mouseY, 0)) {
+            activeDrag = cooldowns;
+            selected = cooldowns;
+            return true;
+        }
+        return false;
     }
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
-        if (drag.isDragging()) {
-            drag.drag(mouseX, mouseY, width, height);
+        if (activeDrag != null && activeDrag.isDragging()) {
+            activeDrag.drag(mouseX, mouseY, width, height);
             return true;
         }
         return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
@@ -150,8 +172,9 @@ public final class HudMoveScreen extends Screen implements HudPreviewScreen {
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (drag.isDragging()) {
-            drag.endDrag();
+        if (activeDrag != null && activeDrag.isDragging()) {
+            activeDrag.endDrag();
+            activeDrag = null;
             return true;
         }
         return super.mouseReleased(mouseX, mouseY, button);
@@ -162,19 +185,19 @@ public final class HudMoveScreen extends Screen implements HudPreviewScreen {
         int step = hasShiftDown() ? NUDGE_STEP_FAST : NUDGE_STEP;
         switch (keyCode) {
             case GLFW.GLFW_KEY_LEFT -> {
-                drag.nudge(-step, 0, width, height);
+                selected.nudge(-step, 0, width, height);
                 return true;
             }
             case GLFW.GLFW_KEY_RIGHT -> {
-                drag.nudge(step, 0, width, height);
+                selected.nudge(step, 0, width, height);
                 return true;
             }
             case GLFW.GLFW_KEY_UP -> {
-                drag.nudge(0, -step, width, height);
+                selected.nudge(0, -step, width, height);
                 return true;
             }
             case GLFW.GLFW_KEY_DOWN -> {
-                drag.nudge(0, step, width, height);
+                selected.nudge(0, step, width, height);
                 return true;
             }
             default -> {
@@ -185,9 +208,12 @@ public final class HudMoveScreen extends Screen implements HudPreviewScreen {
 
     @Override
     public void onClose() {
-        if (drag.isDirty()) {
+        if (cooldowns.isDirty() || (effects != null && effects.isDirty())) {
             HudConfig.SPEC.save();
-            drag.clearDirty();
+            cooldowns.clearDirty();
+            if (effects != null) {
+                effects.clearDirty();
+            }
         }
         if (minecraft != null) {
             minecraft.setScreen(parent);

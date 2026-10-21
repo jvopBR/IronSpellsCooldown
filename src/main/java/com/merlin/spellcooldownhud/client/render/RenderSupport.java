@@ -16,7 +16,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
 /** Drawing primitives shared by the three HUD styles. */
@@ -29,6 +28,9 @@ public final class RenderSupport {
     private static final int SWEEP_SEGMENTS = 72;
 
     private static final float TWO_PI = (float) (Math.PI * 2.0);
+
+    /** Mana convention: a light blue, so the mana badge reads apart from the white timer/level. */
+    private static final int MANA_COLOR = 0xFF6EC6FF;
 
     private RenderSupport() {
     }
@@ -45,7 +47,7 @@ public final class RenderSupport {
      * {@link com.merlin.spellcooldownhud.data.ServerSyncedSource}; only the conversion is left here.
      */
     public static String timerText(CooldownEntry entry) {
-        return HudConfig.TIMER_FORMAT.get().format(entry.remainingTicks() / effectiveTps());
+        return HudConfig.active.timerFormat.get().format(entry.remainingTicks() / effectiveTps());
     }
 
     /**
@@ -73,17 +75,25 @@ public final class RenderSupport {
 
     /** Entry border: the spell's school color, or the fixed config color. */
     public static int borderColorFor(CooldownEntry entry, float alpha) {
-        if (HudConfig.USE_SCHOOL_COLOR.get()) {
+        if (HudConfig.active.useSchoolColor.get()) {
             return rgbWithAlpha(entry.schoolColor(), alpha);
         }
-        return scaleAlpha(HudConfig.BORDER_COLOR.argb(), alpha);
+        return scaleAlpha(HudConfig.active.borderColor.argb(), alpha);
     }
 
-    public static void drawIcon(GuiGraphics graphics, @Nullable ResourceLocation icon,
-                                int x, int y, int size, float alpha, int fallbackRgb) {
+    public static void drawIcon(GuiGraphics graphics, CooldownEntry entry,
+                                int x, int y, int size, float alpha) {
+        // ACTIVE_EFFECTS entries carry a MobEffect handle instead of a spell icon.
+        Object effect = entry.effectIcon();
+        if (effect != null) {
+            drawEffectIcon(graphics, effect, x, y, size, alpha);
+            return;
+        }
+
+        ResourceLocation icon = entry.icon();
         if (icon == null) {
             // Preview without Iron's Spells: a colored square in place of the icon.
-            graphics.fill(x, y, x + size, y + size, rgbWithAlpha(fallbackRgb, alpha * 0.85f));
+            graphics.fill(x, y, x + size, y + size, rgbWithAlpha(entry.schoolColor(), alpha * 0.85f));
             return;
         }
 
@@ -94,6 +104,23 @@ public final class RenderSupport {
         graphics.blit(icon, x, y, size, size, 0.0f, 0.0f,
                 SPELL_ICON_TEXTURE_SIZE, SPELL_ICON_TEXTURE_SIZE,
                 SPELL_ICON_TEXTURE_SIZE, SPELL_ICON_TEXTURE_SIZE);
+        graphics.setColor(1.0f, 1.0f, 1.0f, 1.0f);
+    }
+
+    /** A Minecraft MobEffect icon (atlas sprite), scaled to {@code size}, for ACTIVE_EFFECTS entries. */
+    @SuppressWarnings("unchecked")
+    private static void drawEffectIcon(GuiGraphics graphics, Object effectHandle,
+                                       int x, int y, int size, float alpha) {
+        net.minecraft.client.renderer.texture.TextureAtlasSprite sprite;
+        //? if >=1.21 {
+        sprite = net.minecraft.client.Minecraft.getInstance().getMobEffectTextures().get(
+                (net.minecraft.core.Holder<net.minecraft.world.effect.MobEffect>) effectHandle);
+        //?} else {
+        /*sprite = net.minecraft.client.Minecraft.getInstance().getMobEffectTextures().get(
+                (net.minecraft.world.effect.MobEffect) effectHandle);
+        *///?}
+        graphics.setColor(1.0f, 1.0f, 1.0f, alpha);
+        graphics.blit(x, y, 0, size, size, sprite);
         graphics.setColor(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
@@ -183,7 +210,7 @@ public final class RenderSupport {
         if (intensity <= 0.0f) {
             return;
         }
-        int flash = HudConfig.READY_FLASH_COLOR.argb();
+        int flash = HudConfig.active.readyFlashColor.argb();
         graphics.fill(x, y, x + size, y + size, scaleAlpha(flash, intensity));
     }
 
@@ -192,11 +219,16 @@ public final class RenderSupport {
                                         int width, float alpha) {
         Font font = font();
         int textX = x + (width - font.width(text)) / 2;
-        graphics.drawString(font, text, textX, y, scaleAlpha(HudConfig.TEXT_COLOR.argb(), alpha), true);
+        graphics.drawString(font, text, textX, y, scaleAlpha(HudConfig.active.textColor.argb(), alpha), true);
     }
 
     public static void drawText(GuiGraphics graphics, String text, int x, int y, float alpha) {
-        graphics.drawString(font(), text, x, y, scaleAlpha(HudConfig.TEXT_COLOR.argb(), alpha), true);
+        graphics.drawString(font(), text, x, y, scaleAlpha(HudConfig.active.textColor.argb(), alpha), true);
+    }
+
+    /** Like {@link #drawText} but in the mana color, for the text-list style. */
+    public static void drawManaText(GuiGraphics graphics, String text, int x, int y, float alpha) {
+        graphics.drawString(font(), text, x, y, scaleAlpha(MANA_COLOR, alpha), true);
     }
 
     /**
@@ -210,19 +242,24 @@ public final class RenderSupport {
     public static void drawOverlays(GuiGraphics graphics, CooldownEntry entry,
                                     int x, int y, int size, float alpha) {
         Font font = font();
-        boolean withLevel = HudConfig.SHOW_LEVEL.get() && entry.level() > 0;
+        boolean withLevel = HudConfig.active.showLevel.get() && entry.level() > 0;
+        boolean withMana = HudConfig.active.showMana.get() && entry.manaCost() > 0;
 
-        if (HudConfig.SHOW_TIMER.get() && !entry.ready()) {
-            // With the level at the bottom, the timer is centered in the space left ABOVE it -- so
-            // it follows the icon size instead of sticking to the top on large icons.
-            int textY = withLevel
+        if (HudConfig.active.showTimer.get() && !entry.ready()) {
+            // With a level or mana badge in the bottom band, the timer is centered in the space left
+            // ABOVE it -- so it follows the icon size instead of sticking to the top on large icons.
+            int textY = withLevel || withMana
                     ? y + Math.max(1, (levelTop(size, font) - font.lineHeight) / 2)
                     : y + (size - font.lineHeight) / 2;
             drawCenteredText(graphics, timerText(entry), x, textY, size, alpha);
         }
 
+        // Level bottom-right, mana bottom-left: opposite corners, so they never collide.
         if (withLevel) {
             drawLevelBadge(graphics, entry.level(), x, y, size, alpha);
+        }
+        if (withMana) {
+            drawManaBadge(graphics, entry.manaCost(), x, y, size, alpha);
         }
     }
 
@@ -252,20 +289,37 @@ public final class RenderSupport {
         graphics.fill(textX - 1, textY, textX + textWidth + 1, textY + font.lineHeight - 1,
                 scaleAlpha(0xC0000000, alpha));
         graphics.drawString(font, text, textX, textY,
-                scaleAlpha(HudConfig.TEXT_COLOR.argb(), alpha), true);
+                scaleAlpha(HudConfig.active.textColor.argb(), alpha), true);
+    }
+
+    /** Mana cost in the bottom-left corner of the icon, blue, over a dark background. */
+    public static void drawManaBadge(GuiGraphics graphics, int mana, int iconX, int iconY,
+                                     int size, float alpha) {
+        if (mana <= 0) {
+            return;
+        }
+        String text = String.valueOf(mana);
+        Font font = font();
+        int textX = iconX + 1;
+        int textY = levelTop(size, font) + iconY;
+
+        // Same dark backing as the level badge -- mana numbers vanish over pale icons otherwise.
+        graphics.fill(textX - 1, textY, textX + font.width(text) + 1, textY + font.lineHeight - 1,
+                scaleAlpha(0xC0000000, alpha));
+        graphics.drawString(font, text, textX, textY, scaleAlpha(MANA_COLOR, alpha), true);
     }
 
     public static int backgroundColor(float alpha) {
-        return scaleAlpha(HudConfig.BACKGROUND_COLOR.argb(), alpha);
+        return scaleAlpha(HudConfig.active.backgroundColor.argb(), alpha);
     }
 
     public static int sweepColor(float alpha) {
-        return scaleAlpha(HudConfig.SWEEP_COLOR.argb(), alpha);
+        return scaleAlpha(HudConfig.active.sweepColor.argb(), alpha);
     }
 
     /** Raw text color, for when the caller needs it without drawing. */
     public static int textColor(float alpha) {
-        return scaleAlpha(HudConfig.TEXT_COLOR.argb(), alpha);
+        return scaleAlpha(HudConfig.active.textColor.argb(), alpha);
     }
 
     /** Hex of the color, handy for the editor to show the current value. */

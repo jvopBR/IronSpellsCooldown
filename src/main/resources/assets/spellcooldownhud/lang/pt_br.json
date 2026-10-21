@@ -2,6 +2,9 @@
   "screen.spellcooldownhud.editor": "Editor da HUD de Cooldowns",
   "screen.spellcooldownhud.hint": "Arraste a HUD para posicionar. Setas ajustam 1px (Shift = 10px).",
   "screen.spellcooldownhud.move": "Mover HUD",
+  "screen.spellcooldownhud.groupCooldowns": "Cooldowns",
+  "screen.spellcooldownhud.groupEffects": "Efeitos",
+  "screen.spellcooldownhud.editingGroup": "Editando",
   "screen.spellcooldownhud.moveHint": "Clique e arraste a HUD para onde quiser. Setas ajustam 1px (Shift = 10px).",
   "screen.spellcooldownhud.openSettings": "Configurações",
   "screen.spellcooldownhud.currentAnchor": "Âncora",
@@ -40,6 +43,7 @@
   "option.spellcooldownhud.showName": "Nome da magia",
   "option.spellcooldownhud.showTimer": "Tempo restante",
   "option.spellcooldownhud.showLevel": "Nível da magia",
+  "option.spellcooldownhud.showManaCost": "Custo de mana",
   "option.spellcooldownhud.drawBorder": "Borda",
 
   "option.spellcooldownhud.useSchoolColor": "Cor da escola",
@@ -58,6 +62,7 @@
 
   "option.spellcooldownhud.contentmode.ONLY_ON_COOLDOWN": "Só em cooldown",
   "option.spellcooldownhud.contentmode.ALL_EQUIPPED": "Todas equipadas",
+  "option.spellcooldownhud.showActiveEffects": "Efeitos ativos",
 
   "option.spellcooldownhud.sortmode.TIME_REMAINING_ASC": "Menor tempo",
   "option.spellcooldownhud.sortmode.TIME_REMAINING_DESC": "Maior tempo",
